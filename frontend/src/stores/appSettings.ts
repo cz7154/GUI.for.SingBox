@@ -100,7 +100,7 @@ export const useAppSettingsStore = defineStore('app-settings', () => {
     debugNoAnimation: false,
     debugNoRounded: false,
     debugBorder: false,
-    pages: ['Overview', 'Profiles', 'Subscriptions', 'Plugins'],
+    pages: ['Login','Overview', 'Profiles', 'Subscriptions', 'Plugins'],
   })
 
   const saveAppSettings = debounce((config: string) => {
