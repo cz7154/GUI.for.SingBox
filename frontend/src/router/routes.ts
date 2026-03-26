@@ -4,7 +4,7 @@ const routes: RouteRecordRaw[] = [
     {
     path: '/Login',
     name: 'Login',
-    component: () => import('@/views/LoginView/index.vue'),
+    component: () => import('@/views/Customize/LoginView/index.vue'),
     meta: {
       name: 'router.loginview',
       icon: 'loginview',
