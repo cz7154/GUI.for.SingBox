@@ -10,6 +10,15 @@ const routes: RouteRecordRaw[] = [
       icon: 'loginview',
     },
   },
+      {
+    path: '/Welcome',
+    name: 'Welcome',
+    component: () => import('@/views/Customize/WelcomeView/index.vue'),
+    meta: {
+      name: 'router.welcomeView',
+      icon: 'welcomeview',
+    },
+  },
   {
     path: '/',
     name: 'Overview',

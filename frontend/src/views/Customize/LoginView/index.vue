@@ -1,16 +1,81 @@
 <script setup lang="ts">
-import { ref, watch, useTemplateRef, defineAsyncComponent } from 'vue'
+import { ref, watch, useTemplateRef, defineAsyncComponent,inject } from 'vue'
 import { useI18n } from 'vue-i18n'
+// import router from '@/router'
+import { useRouter } from 'vue-router'
 
+import { useProfilesStore, useAppSettingsStore, useSubscribesStore,useKernelApiStore } from '@/stores'
+import { message, sampleID } from '@/utils'
+const subscribeStore = useSubscribesStore()
+const profilesStore = useProfilesStore()
+const appSettingsStore = useAppSettingsStore()
+const kernelApiStore = useKernelApiStore()
+const url = ref('')
+const name = ref('')
+const loading = ref(false)
+
+const handleCancel = inject('cancel') as any
+const handleSubmit = inject('submit') as any
+const router = useRouter()
 const user = ref({
   account: '',
   password: ''
 })
 
 const handleLogin = () => {
-  console.log(user.value.account, user.value.password);
+    router.push('/welcome')
+  console.log('WWW',user.value.account, user.value.password);
+  handleSave()
 
 }
+const toWelcome = () => {
+    router.push('/welcome')
+}
+
+const handleSave = async () => {
+  console.log('被调用');
+  
+    name.value = 'go-admin-获取链接'+sampleID()
+  if (!name.value) {
+    name.value = sampleID()
+  }
+
+  url.value = 'http://localhost:8080/api/sysParams/getSingBoxmConfig?x-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVVUlEIjoiMTY3NDcxNTEtYTMxOS00N2VkLWJhNTUtZjZhMjQ4NWJhODg3IiwiSUQiOjEsIlVzZXJuYW1lIjoiYWRtaW4iLCJOaWNrTmFtZSI6Ik1yLuWlh-a3vCIsIkF1dGhvcml0eUlkIjo4ODgsIkJ1ZmZlclRpbWUiOjg2NDAwLCJpc3MiOiJxbVBsdXMiLCJhdWQiOlsiR1ZBIl0sImV4cCI6MTc3NTI4NDI1NiwibmJmIjoxNzc0Njc5NDU2fQ.Ru3vNp-mNP9Q7evDXsK0HeAUyzfZqa9dY5WmtLVSDPA'
+  const sub = subscribeStore.getSubscribeTemplate(name.value, { url: url.value })
+
+  loading.value = true
+
+  try {
+    await subscribeStore.addSubscribe(sub)
+    await subscribeStore.updateSubscribe(sub.id)
+  } catch (error: any) {
+    loading.value = false
+    console.log(error)
+    message.error(error)
+    subscribeStore.deleteSubscribe(sub.id)
+    return
+  }
+
+  const profile = profilesStore.getProfileTemplate(name.value)
+
+  if (profile.outbounds[0] && profile.outbounds[1]) {
+    profile.outbounds[0].outbounds.push({ id: sub.id, tag: sub.id, type: 'Subscription' })
+    profile.outbounds[1].outbounds.push({ id: sub.id, tag: sub.id, type: 'Subscription' })
+  }
+
+  await profilesStore.addProfile(profile)
+
+  appSettingsStore.app.kernel.profile = profile.id
+
+  message.success('home.initSuccessful')
+
+  loading.value = false
+
+  handleSubmit()
+
+
+}
+
 </script>
 
 <template>
@@ -32,9 +97,10 @@ const handleLogin = () => {
 
       </div>
     </div>
-    <div class="flex items-center justify-center mt-8">
+    <div class="flex items-center justify-center mt-8 gap-12">
 
       <Button type="primary" @click="handleLogin">登录</Button>
+        <Button type="primary" @click="toWelcome">跳转欢迎页</Button>
     </div>
 
 
