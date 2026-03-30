@@ -4,17 +4,13 @@ import { ref, h, inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useProfilesStore, useAppSettingsStore, useSubscribesStore, useKernelApiStore } from '@/stores'
 import { message, sampleID } from '@/utils'
-const subscribeStore = useSubscribesStore()
-const profilesStore = useProfilesStore()
-const appSettingsStore = useAppSettingsStore()
-const kernelApiStore = useKernelApiStore()
-const url = ref('')
-const name = ref('')
-const loading = ref(false)
-const status = ref(false)
 
-const handleCancel = inject('cancel') as any
-const handleSubmit = inject('submit') as any
+const kernelApiStore = useKernelApiStore()
+
+const loading = ref(false)
+
+
+
 
 
 
@@ -33,8 +29,7 @@ console.log('Component is mounted!')
 const handleStartKernel = async () => {
   try {
     await kernelApiStore.startCore()
-    status.value = true
-    console.log('status.value:',status.value);
+
     
   } catch (error: any) {
     console.error(error)
@@ -45,8 +40,8 @@ const handleStartKernel = async () => {
 const handleStopKernel = async () => {
   try {
     await kernelApiStore.stopCore()
-    status.value = false
-    console.log('status.value:',status.value);
+   
+  //  console.log('status.value:',status.value);
   } catch (error: any) {
     console.error(error)
     message.error(error)
@@ -59,8 +54,8 @@ const handleStopKernel = async () => {
   <div class="w-full h-[90%]">
     <div class=" flex flex-col items-center justify-center">欢迎来到Z-VPN</div>
     <div class="flex items-center justify-center mt-8">
-      <Button v-show="status" type="normal">核心启动中</Button>
-      <Button v-show="!status" type="normal">核心未启动</Button>
+      <Button v-show="kernelApiStore.running" type="normal">核心启动中</Button>
+      <Button v-show="!kernelApiStore.running" type="normal">核心未启动</Button>
     </div>
     <div class="flex items-center justify-center mt-8">
       <Button type="primary" @click="handleStartKernel">启动核心并开启vpn连接</Button>
