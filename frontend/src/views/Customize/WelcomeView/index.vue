@@ -6,7 +6,7 @@ import { useProfilesStore, useAppSettingsStore, useSubscribesStore, useKernelApi
 import { message, sampleID } from '@/utils'
 
 const kernelApiStore = useKernelApiStore()
-
+const appSettingsStore = useAppSettingsStore()
 const loading = ref(false)
 
 
@@ -53,6 +53,7 @@ const handleStopKernel = async () => {
 <template>
   <div class="w-full h-[90%]">
     <div class=" flex flex-col items-center justify-center">欢迎来到Z-VPN</div>
+    <div class=" flex flex-col items-center justify-center">您好: {{ appSettingsStore.app.userInfo.userName }}</div>
     <div class="flex items-center justify-center mt-8">
       <!-- <Button v-show="kernelApiStore.running" type="normal"> -->
         <div v-show="kernelApiStore.running" class="bg-transparent run">核心启动中</div>

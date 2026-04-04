@@ -15,7 +15,7 @@ const name = ref('')
 const loading = ref(false)
 const picPath = ref('')
 // const handleCancel = inject('cancel') as any
-const handleSubmit = inject('submit') as any
+// const handleSubmit = inject('submit') as any
 const router = useRouter()
 const user = ref({
   account: '',
@@ -35,17 +35,33 @@ const toWelcome = () => {
 const handleSave = async () => {
   console.log('被调用');
 
-  name.value = 'go-admin-获取链接' + sampleID()
+  name.value = 's-ui订阅'
   if (!name.value) {
     name.value = sampleID()
   }
-
-  url.value = 'http://localhost:8080/api/sysParams/getSingBoxmConfig?x-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVVUlEIjoiMTY3NDcxNTEtYTMxOS00N2VkLWJhNTUtZjZhMjQ4NWJhODg3IiwiSUQiOjEsIlVzZXJuYW1lIjoiYWRtaW4iLCJOaWNrTmFtZSI6Ik1yLuWlh-a3vCIsIkF1dGhvcml0eUlkIjo4ODgsIkJ1ZmZlclRpbWUiOjg2NDAwLCJpc3MiOiJxbVBsdXMiLCJhdWQiOlsiR1ZBIl0sImV4cCI6MTc3NTI4NDI1NiwibmJmIjoxNzc0Njc5NDU2fQ.Ru3vNp-mNP9Q7evDXsK0HeAUyzfZqa9dY5WmtLVSDPA'
+  url.value =  'https://hksui.czvps.top:2096/sub/123?x-token='+appSettingsStore.app.userInfo.token
+ // url.value = 'http://localhost:8080/api/sysParams/getSingBoxmConfig?x-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVVUlEIjoiMTY3NDcxNTEtYTMxOS00N2VkLWJhNTUtZjZhMjQ4NWJhODg3IiwiSUQiOjEsIlVzZXJuYW1lIjoiYWRtaW4iLCJOaWNrTmFtZSI6Ik1yLuWlh-a3vCIsIkF1dGhvcml0eUlkIjo4ODgsIkJ1ZmZlclRpbWUiOjg2NDAwLCJpc3MiOiJxbVBsdXMiLCJhdWQiOlsiR1ZBIl0sImV4cCI6MTc3NTI4NDI1NiwibmJmIjoxNzc0Njc5NDU2fQ.Ru3vNp-mNP9Q7evDXsK0HeAUyzfZqa9dY5WmtLVSDPA'
   const sub = subscribeStore.getSubscribeTemplate(name.value, { url: url.value })
 
   loading.value = true
 
   try {
+    // 先删掉之前的订阅，以免每次订阅越来越多
+    if(subscribeStore.subscribes.length){
+
+      // 复制一份 ID 列表，避免遍历时修改原数组
+        // const idsToDelete = subscribeStore.subscribes.map(s => s.id);
+        // for(let i = idsToDelete.length - 1; i >= 0; i--){
+        //       subscribeStore.deleteSubscribe(idsToDelete[i] as string);
+        // }
+        console.log('已删除之前订阅节点');
+        
+      // for(let i = subscribeStore.subscribes.length - 1; i >= 0; i--){
+      //   let s = subscribeStore.subscribes[i] 
+      //   subscribeStore.deleteSubscribe(s.id)
+      // }
+
+    }
     await subscribeStore.addSubscribe(sub)
     await subscribeStore.updateSubscribe(sub.id)
   } catch (error: any) {
@@ -71,7 +87,7 @@ const handleSave = async () => {
 
   loading.value = false
 
-  handleSubmit()
+ // handleSubmit()
 
 
 }
@@ -100,7 +116,10 @@ loading.value = true
   console.log('登录结果：', result)
     if(result.code == 0){
     console.log('登录成功：')
+    appSettingsStore.app.userInfo.token = result.data.token
+    appSettingsStore.app.userInfo.userName = result.data.user.userName
     toWelcome()
+    handleSave()
   }else{
      console.log('登录异常：')
     message.error(result.msg)
@@ -129,7 +148,7 @@ loginVerify()
       </div>
       <div class="flex  mt-8 ">
         <div class="mr-20 form-item">验证码:</div>
-        <Input v-model="loginFormData.captcha" type="password" autofocus class="" />
+        <Input v-model="loginFormData.captcha"  autofocus class="" />
         <img class="ml-8 h-30" :src="picPath" alt="请输入验证码" @click="loginVerify()" />
       </div>
     </div>
