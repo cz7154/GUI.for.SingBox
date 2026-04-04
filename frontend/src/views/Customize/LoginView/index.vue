@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, watch, useTemplateRef, defineAsyncComponent,inject } from 'vue'
+import { ref, watch, useTemplateRef, defineAsyncComponent, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 // import router from '@/router'
 import { useRouter } from 'vue-router'
-
-import { useProfilesStore, useAppSettingsStore, useSubscribesStore,useKernelApiStore } from '@/stores'
+import { captcha,login } from '../api/api'
+import { useProfilesStore, useAppSettingsStore, useSubscribesStore, useKernelApiStore } from '@/stores'
 import { message, sampleID } from '@/utils'
 const subscribeStore = useSubscribesStore()
 const profilesStore = useProfilesStore()
@@ -13,8 +13,8 @@ const kernelApiStore = useKernelApiStore()
 const url = ref('')
 const name = ref('')
 const loading = ref(false)
-
-const handleCancel = inject('cancel') as any
+const picPath = ref('')
+// const handleCancel = inject('cancel') as any
 const handleSubmit = inject('submit') as any
 const router = useRouter()
 const user = ref({
@@ -23,19 +23,19 @@ const user = ref({
 })
 
 const handleLogin = () => {
-    router.push('/welcome')
-  console.log('WWW',user.value.account, user.value.password);
+  router.push('/welcome')
+  console.log('WWW', user.value.account, user.value.password);
   handleSave()
 
 }
 const toWelcome = () => {
-    router.push('/welcome')
+  router.push('/welcome')
 }
 
 const handleSave = async () => {
   console.log('被调用');
-  
-    name.value = 'go-admin-获取链接'+sampleID()
+
+  name.value = 'go-admin-获取链接' + sampleID()
   if (!name.value) {
     name.value = sampleID()
   }
@@ -76,6 +76,42 @@ const handleSave = async () => {
 
 }
 
+  const loginFormData = ref({
+    username: 'admin',
+    password: 'jhsdfi8521!@#$.',
+    captcha: '',
+    captchaId: '',
+    openCaptcha: false
+  })
+const loginVerify = async () => {
+  const result = await captcha()
+  console.log('验证码：', result)
+  console.log('验证码code：', result.code)
+  if (result.code == 0) {
+    picPath.value = result.data.picPath
+  //  loginFormData.value.captcha = result.data.captcha
+    loginFormData.value.captchaId = result.data.captchaId
+  }
+}
+const loginIn = async () => {
+loading.value = true
+  const result = await login(loginFormData.value)
+
+  console.log('登录结果：', result)
+    if(result.code == 0){
+    console.log('登录成功：')
+    toWelcome()
+  }else{
+     console.log('登录异常：')
+    message.error(result.msg)
+          // 登陆失败，刷新验证码
+    await loginVerify()
+
+  }
+loading.value = false
+}
+
+loginVerify()
 </script>
 
 <template>
@@ -84,23 +120,25 @@ const handleSave = async () => {
     <div class="form">
       <div class="flex mt-8">
         <div class="mr-20 form-item">账号:</div>
-        <Input v-model="user.account" autofocus class="" />
+        <Input v-model="loginFormData.username" autofocus class="" />
       </div>
       <div class="flex  mt-8">
         <div class="mr-20 form-item">密码:</div>
-        <Input v-model="user.password" type="password" autofocus class="" />
+        <Input v-model="loginFormData.password" type="password" autofocus class="" />
 
       </div>
-      <div class="flex  mt-8">
+      <div class="flex  mt-8 ">
         <div class="mr-20 form-item">验证码:</div>
-        <Input v-model="user.password" type="password" autofocus class="" />
-
+        <Input v-model="loginFormData.captcha" type="password" autofocus class="" />
+        <img class="ml-8 h-30" :src="picPath" alt="请输入验证码" @click="loginVerify()" />
       </div>
     </div>
     <div class="flex items-center justify-center mt-8 gap-12">
-
-      <Button type="primary" @click="handleLogin">登录</Button>
-        <Button type="primary" @click="toWelcome">跳转欢迎页</Button>
+<!-- 
+      <Button type="primary" @click="handleLogin">登录</Button> -->
+      
+      <Button type="primary" :loading="loading" @click="loginIn">登录</Button>
+      <Button type="primary" @click="toWelcome">跳转欢迎页</Button>
     </div>
 
 
@@ -109,10 +147,11 @@ const handleSave = async () => {
 </template>
 <style lang="less" scoped>
 .form {
-  
-    padding-left: 280px;
-  .form-item{
-     min-width: 80px;
+
+  padding-left: 280px;
+
+  .form-item {
+    min-width: 80px;
   }
 }
 </style>

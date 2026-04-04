@@ -54,13 +54,18 @@ const handleStopKernel = async () => {
   <div class="w-full h-[90%]">
     <div class=" flex flex-col items-center justify-center">欢迎来到Z-VPN</div>
     <div class="flex items-center justify-center mt-8">
-      <Button v-show="kernelApiStore.running" type="normal">核心启动中</Button>
-      <Button v-show="!kernelApiStore.running" type="normal">核心未启动</Button>
+      <!-- <Button v-show="kernelApiStore.running" type="normal"> -->
+        <div v-show="kernelApiStore.running" class="bg-transparent run">核心启动中</div>
+      <!-- </Button> -->
+      <!-- <Button v-show="!kernelApiStore.running" type="normal">
+        <div class="bg-red">核心未启动</div> -->
+        <div v-show="!kernelApiStore.running" class="bg-transparent run">核心未启动</div>
+      <!-- </Button> -->
     </div>
-    <div class="flex items-center justify-center mt-8">
+    <div v-show="!kernelApiStore.running" class="flex items-center justify-center mt-8">
       <Button type="primary" @click="handleStartKernel">启动核心并开启vpn连接</Button>
     </div>
-    <div class="flex items-center justify-center mt-8">
+    <div v-show="kernelApiStore.running" class="flex items-center justify-center mt-8">
       <Button type="primary" @click="handleStopKernel">停止核心</Button>
     </div>
   </div>
@@ -73,5 +78,9 @@ const handleStopKernel = async () => {
   .form-item {
     min-width: 80px;
   }
+}
+.run{
+  background-color: greenyellow;
+  color: rgb(7, 7, 6);
 }
 </style>
