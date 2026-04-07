@@ -64,7 +64,7 @@ const handleStopKernel = async () => {
       <!-- </Button> -->
     </div>
     <div v-show="!kernelApiStore.running" class="flex items-center justify-center mt-8">
-      <Button type="primary" @click="handleStartKernel">启动核心并开启vpn连接</Button>
+      <Button :loading="kernelApiStore.starting" type="primary" @click="handleStartKernel">启动核心并开启vpn连接</Button>
     </div>
     <div v-show="kernelApiStore.running" class="flex items-center justify-center mt-8">
       <Button type="primary" @click="handleStopKernel">停止核心</Button>

@@ -3,7 +3,7 @@ import { ref, watch, useTemplateRef, defineAsyncComponent, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 // import router from '@/router'
 import { useRouter } from 'vue-router'
-import { captcha,login } from '../api/api'
+import { captcha, login } from '../api/api'
 import { useProfilesStore, useAppSettingsStore, useSubscribesStore, useKernelApiStore } from '@/stores'
 import { message, sampleID } from '@/utils'
 const subscribeStore = useSubscribesStore()
@@ -39,28 +39,34 @@ const handleSave = async () => {
   if (!name.value) {
     name.value = sampleID()
   }
-  url.value =  'https://hksui.czvps.top:2096/sub/123?x-token='+appSettingsStore.app.userInfo.token
- // url.value = 'http://localhost:8080/api/sysParams/getSingBoxmConfig?x-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVVUlEIjoiMTY3NDcxNTEtYTMxOS00N2VkLWJhNTUtZjZhMjQ4NWJhODg3IiwiSUQiOjEsIlVzZXJuYW1lIjoiYWRtaW4iLCJOaWNrTmFtZSI6Ik1yLuWlh-a3vCIsIkF1dGhvcml0eUlkIjo4ODgsIkJ1ZmZlclRpbWUiOjg2NDAwLCJpc3MiOiJxbVBsdXMiLCJhdWQiOlsiR1ZBIl0sImV4cCI6MTc3NTI4NDI1NiwibmJmIjoxNzc0Njc5NDU2fQ.Ru3vNp-mNP9Q7evDXsK0HeAUyzfZqa9dY5WmtLVSDPA'
+  url.value = 'https://hksui.czvps.top:2096/sub/123?x-token=' + appSettingsStore.app.userInfo.token
+  // url.value = 'http://localhost:8080/api/sysParams/getSingBoxmConfig?x-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVVUlEIjoiMTY3NDcxNTEtYTMxOS00N2VkLWJhNTUtZjZhMjQ4NWJhODg3IiwiSUQiOjEsIlVzZXJuYW1lIjoiYWRtaW4iLCJOaWNrTmFtZSI6Ik1yLuWlh-a3vCIsIkF1dGhvcml0eUlkIjo4ODgsIkJ1ZmZlclRpbWUiOjg2NDAwLCJpc3MiOiJxbVBsdXMiLCJhdWQiOlsiR1ZBIl0sImV4cCI6MTc3NTI4NDI1NiwibmJmIjoxNzc0Njc5NDU2fQ.Ru3vNp-mNP9Q7evDXsK0HeAUyzfZqa9dY5WmtLVSDPA'
   const sub = subscribeStore.getSubscribeTemplate(name.value, { url: url.value })
 
   loading.value = true
 
   try {
     // 先删掉之前的订阅，以免每次订阅越来越多
-    if(subscribeStore.subscribes.length){
+   // console.log('subscribeStore.subscribes.length：', subscribeStore.subscribes.length);
+    if (subscribeStore.subscribes.length) {
 
       // 复制一份 ID 列表，避免遍历时修改原数组
-        // const idsToDelete = subscribeStore.subscribes.map(s => s.id);
-        // for(let i = idsToDelete.length - 1; i >= 0; i--){
-        //       subscribeStore.deleteSubscribe(idsToDelete[i] as string);
-        // }
+      const idsToDelete = subscribeStore.subscribes.map(s => s.id);
+      for (let i = idsToDelete.length - 1; i >= 0; i--) {
+        await subscribeStore.deleteSubscribe(idsToDelete[i] as string);
         console.log('已删除之前订阅节点');
-        
-      // for(let i = subscribeStore.subscribes.length - 1; i >= 0; i--){
-      //   let s = subscribeStore.subscribes[i] 
-      //   subscribeStore.deleteSubscribe(s.id)
-      // }
+        // await profilesStore.deleteProfile(idsToDelete[i] as string);
+        // console.log('已删除之前配置节点');
 
+      }
+
+    }
+    if (profilesStore.profiles.length) {
+      const idsProfilesToDelete = profilesStore.profiles.map(s => s.id);
+      for (let i = idsProfilesToDelete.length - 1; i >= 0; i--) {
+        await profilesStore.deleteProfile(idsProfilesToDelete[i] as string);
+        console.log('已删除之前配置节点');
+      }
     }
     await subscribeStore.addSubscribe(sub)
     await subscribeStore.updateSubscribe(sub.id)
@@ -87,47 +93,47 @@ const handleSave = async () => {
 
   loading.value = false
 
- // handleSubmit()
+  // handleSubmit()
 
 
 }
 
-  const loginFormData = ref({
-    username: 'admin',
-    password: 'jhsdfi8521!@#$.',
-    captcha: '',
-    captchaId: '',
-    openCaptcha: false
-  })
+const loginFormData = ref({
+  username: 'admin',
+  password: 'jhsdfi8521!@#$.',
+  captcha: '',
+  captchaId: '',
+  openCaptcha: false
+})
 const loginVerify = async () => {
   const result = await captcha()
   console.log('验证码：', result)
   console.log('验证码code：', result.code)
   if (result.code == 0) {
     picPath.value = result.data.picPath
-  //  loginFormData.value.captcha = result.data.captcha
+    //  loginFormData.value.captcha = result.data.captcha
     loginFormData.value.captchaId = result.data.captchaId
   }
 }
 const loginIn = async () => {
-loading.value = true
+  loading.value = true
   const result = await login(loginFormData.value)
 
   console.log('登录结果：', result)
-    if(result.code == 0){
+  if (result.code == 0) {
     console.log('登录成功：')
     appSettingsStore.app.userInfo.token = result.data.token
     appSettingsStore.app.userInfo.userName = result.data.user.userName
     toWelcome()
     handleSave()
-  }else{
-     console.log('登录异常：')
+  } else {
+    console.log('登录异常：')
     message.error(result.msg)
-          // 登陆失败，刷新验证码
+    // 登陆失败，刷新验证码
     await loginVerify()
 
   }
-loading.value = false
+  loading.value = false
 }
 
 loginVerify()
@@ -148,14 +154,14 @@ loginVerify()
       </div>
       <div class="flex  mt-8 ">
         <div class="mr-20 form-item">验证码:</div>
-        <Input v-model="loginFormData.captcha"  autofocus class="" />
+        <Input v-model="loginFormData.captcha" autofocus class="" />
         <img class="ml-8 h-30" :src="picPath" alt="请输入验证码" @click="loginVerify()" />
       </div>
     </div>
     <div class="flex items-center justify-center mt-8 gap-12">
-<!-- 
+      <!-- 
       <Button type="primary" @click="handleLogin">登录</Button> -->
-      
+
       <Button type="primary" :loading="loading" @click="loginIn">登录</Button>
       <Button type="primary" @click="toWelcome">跳转欢迎页</Button>
     </div>
