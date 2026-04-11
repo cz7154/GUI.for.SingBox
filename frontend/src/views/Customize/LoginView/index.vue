@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { captcha, login } from '../api/api'
 import { useProfilesStore, useAppSettingsStore, useSubscribesStore, useKernelApiStore } from '@/stores'
 import { message, sampleID } from '@/utils'
+import vLoading from '@/views/Customize/components/directives/vLoading'
 const subscribeStore = useSubscribesStore()
 const profilesStore = useProfilesStore()
 const appSettingsStore = useAppSettingsStore()
@@ -13,6 +14,7 @@ const kernelApiStore = useKernelApiStore()
 const url = ref('')
 const name = ref('')
 const loading = ref(false)
+const isLoading = ref(true)
 const picPath = ref('')
 // const handleCancel = inject('cancel') as any
 // const handleSubmit = inject('submit') as any
@@ -106,6 +108,7 @@ const loginFormData = ref({
   openCaptcha: false
 })
 const loginVerify = async () => {
+  isLoading.value = true
   const result = await captcha()
   console.log('验证码：', result)
   console.log('验证码code：', result.code)
@@ -114,6 +117,7 @@ const loginVerify = async () => {
     //  loginFormData.value.captcha = result.data.captcha
     loginFormData.value.captchaId = result.data.captchaId
   }
+  isLoading.value = false
 }
 const loginIn = async () => {
   loading.value = true
@@ -152,10 +156,12 @@ loginVerify()
         <Input v-model="loginFormData.password" type="password" autofocus class="" />
 
       </div>
-      <div class="flex  mt-8 ">
+      <div class="flex  mt-8 "  >
         <div class="mr-20 form-item">验证码:</div>
         <Input v-model="loginFormData.captcha" autofocus class="" />
-        <img class="ml-8 h-30" :src="picPath" alt="请输入验证码" @click="loginVerify()" />
+        <div class="ml-8 " v-loading="isLoading">
+         <img  class="h-30" :src="picPath" alt="请输入验证码" @click="loginVerify()" />
+        </div>
       </div>
     </div>
     <div class="flex items-center justify-center mt-8 gap-12">
