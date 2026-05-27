@@ -7,10 +7,30 @@ import RulesetsView from '@/views/RulesetsView/index.vue'
 import ScheduledTasksView from '@/views/ScheduledTasksView/index.vue'
 import SettingsView from '@/views/SettingsView/index.vue'
 import SubscribesView from '@/views/SubscribesView/index.vue'
+import LoginView from '@/views/Customize/LoginView/index.vue'
+import WelcomeView from '@/views/Customize/WelcomeView/index.vue'
 
 const routes: RouteRecordRaw[] = [
-  {
+    {
     path: '/',
+    name: 'Login',
+    component: LoginView,
+    meta: {
+      name: 'router.login',
+      icon: 'loginview',
+    },
+  },
+      {
+    path: '/Welcome',
+    name: 'Welcome',
+    component: WelcomeView,
+    meta: {
+      name: 'router.welcomeView',
+      icon: 'welcomeview',
+    },
+  },
+  {
+    path: '/Overview',
     name: 'Overview',
     component: HomeView,
     meta: {

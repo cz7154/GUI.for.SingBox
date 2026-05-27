@@ -119,6 +119,13 @@ export interface AppSettings {
   debugBorder: boolean
   debugUsePointer: boolean
   pages: string[]
+  userInfo: {
+    userName: string
+    email: string
+    nickName: string
+    uuid: string
+    token: string
+  }
 }
 
 export interface PluginConfiguration {
