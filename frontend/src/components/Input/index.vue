@@ -9,7 +9,7 @@ export interface Props {
   modelValue?: string | number | undefined
   autoSize?: boolean
   placeholder?: string
-  type?: 'number' | 'text' | 'code'| 'password'
+  type?: 'number' | 'text' | 'code'
   lang?: 'yaml' | 'json' | 'javascript'
   size?: 'default' | 'small'
   editable?: boolean

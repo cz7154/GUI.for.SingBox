@@ -10,6 +10,7 @@ import SubscribesView from '@/views/SubscribesView/index.vue'
 import LoginView from '@/views/Customize/LoginView/index.vue'
 import WelcomeView from '@/views/Customize/WelcomeView/index.vue'
 
+
 const routes: RouteRecordRaw[] = [
     {
     path: '/',

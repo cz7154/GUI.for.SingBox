@@ -1,13 +1,13 @@
 // uno.config.ts
-import { defineConfig, presetUno } from 'unocss'
-import presetRemToPx from '@unocss/preset-rem-to-px'
+import { defineConfig } from 'unocss'
+// import presetRemToPx from '@unocss/preset-rem-to-px'
 export default defineConfig({
   // 使用基础预设，包含常用的原子化工具类
   presets: [
-    presetUno(),
-    presetRemToPx({
-      baseFontSize: 4,  // 关键配置：1rem = 4px
-    }),
+   
+    // presetRemToPx({
+    //   baseFontSize: 4,  // 关键配置：1rem = 4px
+    // }),
   ],
   // 核心配置：指定需要扫描哪些文件
   content: {

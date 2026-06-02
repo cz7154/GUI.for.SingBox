@@ -1,16 +1,19 @@
-import { fileURLToPath, URL } from 'node:url'
-
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import UnoCSS from 'unocss/vite' // 引入 UnoCSS 插件
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
   plugins: [vue(),
-       UnoCSS({
+           UnoCSS({
       mode: 'vue-scoped', // 在这里指定模式
-    }),
-  ],
+    }),],
+  server: {
+    watch: {
+      ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/src/bridge/wailsjs/**'],
+    },
+  },
   resolve: {
     extensions: ['.ts', '.js'],
     alias: {
