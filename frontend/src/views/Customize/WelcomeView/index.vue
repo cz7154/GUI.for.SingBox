@@ -2,7 +2,7 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NDataTable, NModal, NTag, type DataTableColumns } from 'naive-ui'
+import { NButton, NCard, NList, NListItem,NThing, NModal, NTag } from 'naive-ui'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
 import { formatBytes, formatDate, message } from '@/utils'
 import type { Subscription } from '@/types/app'
@@ -23,34 +23,34 @@ const statistics = ref({
 
 const userName = computed(() => appSettingsStore.app.userInfo.userName || '用户')
 
-const proxyColumns: DataTableColumns<ProxyItem> = [
-  {
-    title: '节点',
-    key: 'tag',
-    ellipsis: {
-      tooltip: true,
-    },
-    render(row) {
-      return h('span', { class: 'font-medium text-#1f2937' }, row.tag || row.id || '--')
-    },
-  },
-  {
-    title: '协议',
-    key: 'type',
-    width: 120,
-    render(row) {
-      return h(
-        NTag,
-        {
-          size: 'small',
-          type: getProxyTagType(row.type),
-          round: true,
-        },
-        { default: () => row.type || 'Unknown' },
-      )
-    },
-  },
-]
+// const proxyColumns: DataTableColumns<ProxyItem> = [
+//   {
+//     title: '节点',
+//     key: 'tag',
+//     ellipsis: {
+//       tooltip: true,
+//     },
+//     render(row) {
+//       return h('span', { class: 'font-medium text-#1f2937' }, row.tag || row.id || '--')
+//     },
+//   },
+//   {
+//     title: '协议',
+//     key: 'type',
+//     width: 120,
+//     render(row) {
+//       return h(
+//         NTag,
+//         {
+//           size: 'small',
+//           type: getProxyTagType(row.type),
+//           round: true,
+//         },
+//         { default: () => row.type || 'Unknown' },
+//       )
+//     },
+//   },
+// ]
 
 const unregisterTrafficHandler = kernelApiStore.onTraffic((data) => {
   const { up, down } = data
@@ -179,10 +179,10 @@ const handleConfirmLogout = () => {
         </div>
 
         <div class="grid grid-cols-1 gap-32px lg:grid-cols-[1fr_1.6fr]">
-          <div>
+          <!-- <div>
             <div class="mb-6px text-14px text-#666">{{ t('subscribes.proxyCount') }}</div>
             <div class="text-62px font-bold leading-none text-#6D28D9">{{ s.proxies.length }}</div>
-          </div>
+          </div> -->
 
           <div class="flex flex-col gap-24px">
             <div class="flex flex-wrap gap-36px">
@@ -206,14 +206,47 @@ const handleConfirmLogout = () => {
           </div>
         </div>
 
-        <div class="mt-30px border-t border-#eef2f7 pt-22px">
+        <!-- <div class="mt-30px border-t border-#eef2f7 pt-22px">
           <div class="mb-12px flex items-center justify-between">
             <div class="text-16px font-semibold text-#1f2937">代理列表</div>
             <n-tag size="small" round>{{ s.proxies.length }} 个节点</n-tag>
           </div>
           <n-data-table :columns="proxyColumns" :data="s.proxies" :row-key="(row: ProxyItem) => row.id"
             :pagination="{ pageSize: 6 }" size="small" />
-        </div>
+        </div> -->
+                <!-- 节点列表 -->
+        <!-- <div>节点列表</div> -->
+        <n-card content-style="padding: 0;max-height: 280px;" content-scrollable :bordered="false"
+             header-style="padding: 10px;font-size: 15px;" segmented>
+            <template #header>
+                节点列表({{ s.proxies.length }})
+            </template>
+            <n-list hoverable clickable >
+                <n-list-item v-for="snode in s.proxies" :key="snode.id" >
+                    <!-- <template #prefix>
+                    <n-button>Prefix</n-button> 
+                     <GameControllerOutline />
+                </template> -->
+                    <n-thing :title="snode.tag" content-style="margin-top: 10px;">
+                        <template #description>
+                            <n-space size="small" style="margin-top: 4px">
+                                <n-tag :bordered="false" type="info" size="small">
+                                    CN2 GIA
+                                </n-tag>
+                                <n-tag :bordered="false" type="success" size="small">
+                                    可用
+                                </n-tag>
+                                <n-tag :bordered="false" type="success" size="small">
+                                    延迟：23ms
+                                </n-tag>
+                            </n-space>
+                        </template>
+
+                    </n-thing>
+                </n-list-item>
+                
+            </n-list>
+        </n-card>
       </div>
     </n-card>
 
