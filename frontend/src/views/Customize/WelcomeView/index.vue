@@ -128,13 +128,8 @@ const handleConfirmLogout = () => {
 
 <template>
   <div class="p-24px">
-    <n-card
-      v-for="s in subscribeStore.subscribes"
-      :key="s.id"
-      :bordered="false"
-      class="mb-32px overflow-hidden rounded-20px shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]"
-      content-class="p-0!"
-    >
+    <n-card v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false"
+      class="mb-32px overflow-hidden rounded-20px shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]" content-class="p-0!">
       <div class="bg-gradient-to-r from-#6D28D9 to-#18a058 px-32px py-24px text-white ">
         <div class="flex flex-col gap-18px md:flex-row md:items-start md:justify-between">
           <div>
@@ -148,20 +143,15 @@ const handleConfirmLogout = () => {
           </div>
 
           <div class="flex flex-col gap-14px text-left md:items-end md:text-right">
-            <n-button
-              secondary
-              type="primary"
-              size="small"
-              class="rounded-12px bg-white/18 px-14px text-white hover:bg-white/28"
-              @click="handleLogout"
-            >
+            <n-button secondary type="primary" size="small"
+              class="rounded-12px bg-white/18 px-14px text-white hover:bg-white/28" @click="handleLogout">
               退出登录
             </n-button>
 
             <div>
-             
+
               <div class="flex gap-24px text-17px">
-                   <span>实时流量 ：</span>
+                <span>实时流量 ：</span>
                 <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
                 <span>↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
@@ -172,27 +162,19 @@ const handleConfirmLogout = () => {
 
       <div class="px-32px py-32px">
         <div class="mb-24px flex flex-col gap-14px md:flex-row md:items-center md:justify-between">
-          <n-button
-            :type="kernelApiStore.running ? 'error' : 'primary'"
-            size="large"
-            :loading="kernelApiStore.starting"
-            class="h-50px rounded-14px px-28px text-18px font-semibold"
-            @click="handleToggleKernel"
-          >
+          <n-button :type="kernelApiStore.running ? 'error' : 'primary'" size="large" :loading="kernelApiStore.starting"
+            class="h-50px rounded-14px px-28px text-18px font-semibold" @click="handleToggleKernel">
             {{ kernelApiStore.running ? '停止 VPN 连接' : '开启 VPN 连接' }}
           </n-button>
 
-          <n-button
-            secondary
-            type="primary"
-            :loading="s.updating"
-            class="h-40px rounded-12px px-16px"
-            @click="handleUpdateSub(s)"
-          >
-            更新订阅
-            <span class="ml-8px text-11px opacity-70">
-              {{ s.updateTime ? formatDate(s.updateTime, 'YYYY-MM-DD HH:mm:ss') : '--' }}
-            </span>
+          <n-button secondary type="primary" :loading="s.updating" class="h-40px rounded-12px px-16px"
+            @click="handleUpdateSub(s)">
+            <div>
+              <div class="text-12px font-semibold mb-5px">更新订阅</div>
+              <div class="ml-8px text-10px opacity-70">
+                {{ s.updateTime ? formatDate(s.updateTime, 'YYYY-MM-DD HH:mm:ss') : '--' }}
+              </div>
+            </div>
           </n-button>
         </div>
 
@@ -229,36 +211,19 @@ const handleConfirmLogout = () => {
             <div class="text-16px font-semibold text-#1f2937">代理列表</div>
             <n-tag size="small" round>{{ s.proxies.length }} 个节点</n-tag>
           </div>
-          <n-data-table
-            :columns="proxyColumns"
-            :data="s.proxies"
-            :row-key="(row: ProxyItem) => row.id"
-            :pagination="{ pageSize: 6 }"
-            size="small"
-          />
+          <n-data-table :columns="proxyColumns" :data="s.proxies" :row-key="(row: ProxyItem) => row.id"
+            :pagination="{ pageSize: 6 }" size="small" />
         </div>
       </div>
     </n-card>
 
     <n-card v-if="!subscribeStore.subscribes.length" :bordered="false" class="rounded-20px text-center">
       <div class="py-42px text-#666">暂无订阅，请先登录或添加订阅。</div>
-                <n-button
-            secondary
-            type="primary"
-           
-            class="h-40px rounded-12px px-16px"
-            @click="handleConfirmLogout"
-          >返回 </n-button>
+      <n-button secondary type="primary" class="h-40px rounded-12px px-16px" @click="handleConfirmLogout">返回 </n-button>
     </n-card>
 
-    <n-modal
-      v-model:show="showLogoutConfirm"
-      preset="dialog"
-      title="提示"
-      positive-text="确认"
-      negative-text="取消"
-      @positive-click="handleConfirmLogout"
-    >
+    <n-modal v-model:show="showLogoutConfirm" preset="dialog" title="提示" positive-text="确认" negative-text="取消"
+      @positive-click="handleConfirmLogout">
       是否退出登录
     </n-modal>
   </div>

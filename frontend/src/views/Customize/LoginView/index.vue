@@ -59,19 +59,19 @@ const handleSave = async () => {
 
   
   try {
-    // if (subscribeStore.subscribes.length) {
-    //   const idsToDelete = subscribeStore.subscribes.map((s) => s.id)
-    //   for (let i = idsToDelete.length - 1; i >= 0; i--) {
-    //     await subscribeStore.deleteSubscribe(idsToDelete[i] as string)
-    //   }
-    // }
+    if (subscribeStore.subscribes.length) {
+      const idsToDelete = subscribeStore.subscribes.map((s) => s.id)
+      for (let i = idsToDelete.length - 1; i >= 0; i--) {
+        await subscribeStore.deleteSubscribe(idsToDelete[i] as string)
+      }
+    }
 
-    // if (profilesStore.profiles.length) {
-    //   const idsProfilesToDelete = profilesStore.profiles.map((s) => s.id)
-    //   for (let i = idsProfilesToDelete.length - 1; i >= 0; i--) {
-    //     await profilesStore.deleteProfile(idsProfilesToDelete[i] as string)
-    //   }
-    // }
+    if (profilesStore.profiles.length) {
+      const idsProfilesToDelete = profilesStore.profiles.map((s) => s.id)
+      for (let i = idsProfilesToDelete.length - 1; i >= 0; i--) {
+        await profilesStore.deleteProfile(idsProfilesToDelete[i] as string)
+      }
+    }
 
     await subscribeStore.addSubscribe(sub)
     await subscribeStore.updateSubscribe(sub.id)
