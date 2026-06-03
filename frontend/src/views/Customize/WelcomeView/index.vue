@@ -2,7 +2,7 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag,NSpace  } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag,NSpace,NScrollbar  } from 'naive-ui'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
 import { formatBytes, formatDate, message,APP_TITLE } from '@/utils'
 import type { Subscription } from '@/types/app'
@@ -115,7 +115,7 @@ const handleConfirmLogout = () => {
                 <span class="mx-2">/ {{ s.total ? formatBytes(s.total, 2) : '--' }}</span>
                 <span class="mx-2">实时流量 ：</span>
                 <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
-                <span>↓ {{ formatBytes(statistics.download) }}/s</span>
+                <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
             </div>
 
@@ -147,11 +147,12 @@ const handleConfirmLogout = () => {
 
         <!-- 节点列表 -->
         <!-- <div>节点列表</div> -->
-        <n-card content-style="padding: 0;max-height: 280px;" content-scrollable :bordered="false"
+        <n-card content-style="padding: 0;max-height: 280px;"  :bordered="false"
           header-style="padding: 10px;font-size: 15px;" segmented>
           <template #header>
             节点列表({{ s.proxies.length }})
           </template>
+          <n-scrollbar style="max-height: 280px">
           <n-list hoverable clickable>
             <n-list-item v-for="snode in s.proxies" :key="snode.id">
               <!-- <template #prefix>
@@ -177,6 +178,7 @@ const handleConfirmLogout = () => {
             </n-list-item>
 
           </n-list>
+          </n-scrollbar>
         </n-card>
       </div>
     </n-card>
