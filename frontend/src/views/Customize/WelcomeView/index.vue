@@ -4,9 +4,8 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { NButton, NCard, NList, NListItem, NThing, NModal, NTag } from 'naive-ui'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
-import { formatBytes, formatDate, message } from '@/utils'
+import { formatBytes, formatDate, message,APP_TITLE } from '@/utils'
 import type { Subscription } from '@/types/app'
-
 const kernelApiStore = useKernelApiStore()
 const appSettingsStore = useAppSettingsStore()
 const subscribeStore = useSubscribesStore()
@@ -89,7 +88,7 @@ const handleConfirmLogout = () => {
       class="mb-32px overflow-hidden rounded-20px shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]" content-class="p-0!">
       <div class="bg-gradient-to-r from-#6D28D9 to-#18a058 px-32px py-24px text-white ">
         <div class="flex items-center">
-          <div class="flex-1 m-0 text-28px font-semibold">欢迎来到 Z-VPN</div>
+          <div class="flex-1 m-0 text-28px font-semibold">欢迎来到 {{ APP_TITLE }}</div>
           <div class="">
             <n-button type="error" size="small" @click="handleLogout">
               <template #icon>
