@@ -18,7 +18,7 @@ import {
   useProfilesStore,
   useSubscribesStore,
 } from '@/stores'
-import { message, sampleID } from '@/utils'
+import { message, sampleID,APP_TITLE } from '@/utils'
 
 const router = useRouter()
 const subscribeStore = useSubscribesStore()
@@ -140,8 +140,8 @@ loginVerify()
       >
         <div class="mb-32px text-center">
           <div class="mb-12px text-48px">🔐</div>
-          <h1 class="text-28px text-black font-bold tracking-tight">Z-VPN</h1>
-          <p class="mt-6px text-15px text-gray-400">安全 · 高速 · 稳定</p>
+          <h1 class="text-28px text-black font-bold tracking-tight">{{ APP_TITLE }}</h1>
+          <p class="mt-6px text-15px text-gray-400">SECURE • FAST • PRIVATE</p>
         </div>
 
         <n-form :model="loginForm" label-placement="top">
