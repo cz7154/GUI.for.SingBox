@@ -2,7 +2,7 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag,NSpace  } from 'naive-ui'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
 import { formatBytes, formatDate, message,APP_TITLE } from '@/utils'
 import type { Subscription } from '@/types/app'
@@ -13,7 +13,7 @@ const { t } = useI18n()
 const router = useRouter()
 
 const showLogoutConfirm = ref(false)
-const loading = ref(false)
+const updateLoading = ref(false)
 
 const statistics = ref({
   upload: 0,
@@ -61,14 +61,15 @@ const handleToggleKernel = () => {
 }
 
 const handleUpdateSub = async (s: Subscription) => {
-  loading.value = true
+  updateLoading.value = true
   try {
     await subscribeStore.updateSubscribe(s.id)
+    message.success('更新成功')
   } catch (error: any) {
     console.error('updateSubscribe: ', error)
     message.error(error)
   } finally {
-    loading.value = false
+    updateLoading.value = false
   }
 }
 
@@ -133,7 +134,7 @@ const handleConfirmLogout = () => {
             {{ kernelApiStore.running ? '停止 VPN 连接' : '开启 VPN 连接' }}
           </n-button>
 
-          <n-button secondary type="primary" :loading="loading" class="h-40px rounded-12px px-16px"
+          <n-button secondary type="primary" :loading="updateLoading" class="h-40px rounded-12px px-16px"
             @click="handleUpdateSub(s)">
             <div>
               <div class="text-12px font-semibold mb-5px">更新订阅</div>
