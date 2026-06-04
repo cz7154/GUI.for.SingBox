@@ -2,9 +2,9 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag,NSpace,NScrollbar  } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar } from 'naive-ui'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
-import { formatBytes, formatDate, message,APP_TITLE } from '@/utils'
+import { formatBytes, formatDate, message, APP_TITLE } from '@/utils'
 import type { Subscription } from '@/types/app'
 const kernelApiStore = useKernelApiStore()
 const appSettingsStore = useAppSettingsStore()
@@ -93,7 +93,7 @@ const handleConfirmLogout = () => {
           <div class="">
             <n-button type="error" size="small" @click="handleLogout">
               <template #icon>
-                <Icon icon="settings" />
+                <Icon icon="close" />
               </template>
               注销
             </n-button>
@@ -109,13 +109,15 @@ const handleConfirmLogout = () => {
             <div class="rounded-2 bg-white/25 px-12px py-4px text-13px mb-10px">
               <div>{{ t('subscribes.expire') }}：{{ s.expire ? formatDate(s.expire, 'YYYY-MM-DD HH:mm:ss') : '--' }}
               </div>
+              <div> <span >实时流量 ：</span>
+                <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
+                <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
+              </div>
               <div> <span>{{ t('subscribes.total') }}：{{ formatBytes(s.download + s.upload, 2) }}</span>
                 <span class="ml-3px text-10px">( ↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
                   ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }} )</span>
                 <span class="mx-2">/ {{ s.total ? formatBytes(s.total, 2) : '--' }}</span>
-                <span class="mx-2">实时流量 ：</span>
-                <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
-                <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
+
               </div>
             </div>
 
@@ -147,37 +149,37 @@ const handleConfirmLogout = () => {
 
         <!-- 节点列表 -->
         <!-- <div>节点列表</div> -->
-        <n-card content-style="padding: 0;max-height: 280px;"  :bordered="false"
+        <n-card content-style="padding: 0;max-height: 280px;" :bordered="false"
           header-style="padding: 10px;font-size: 15px;" segmented>
           <template #header>
             节点列表({{ s.proxies.length }})
           </template>
           <n-scrollbar style="max-height: 280px">
-          <n-list hoverable clickable>
-            <n-list-item v-for="snode in s.proxies" :key="snode.id">
-              <!-- <template #prefix>
+            <n-list hoverable clickable>
+              <n-list-item v-for="snode in s.proxies" :key="snode.id">
+                <!-- <template #prefix>
                     <n-button>Prefix</n-button> 
                      <GameControllerOutline />
                 </template> -->
-              <n-thing :title="snode.tag" content-style="margin-top: 10px;">
-                <template #description>
-                  <n-space size="medium" style="margin-top: 4px">
-                    <n-tag :bordered="false" type="info" size="small">
-                      CN2 GIA
-                    </n-tag>
-                    <n-tag :bordered="false" type="success" size="small">
-                      可用
-                    </n-tag>
-                    <n-tag :bordered="false" type="success" size="small">
-                      延迟：23ms
-                    </n-tag>
-                  </n-space>
-                </template>
+                <n-thing :title="snode.tag" content-style="margin-top: 10px;">
+                  <template #description>
+                    <n-space size="medium" style="margin-top: 4px">
+                      <n-tag :bordered="false" type="info" size="small">
+                        CN2 GIA
+                      </n-tag>
+                      <n-tag :bordered="false" type="success" size="small">
+                        可用
+                      </n-tag>
+                      <n-tag :bordered="false" type="success" size="small">
+                        延迟：23ms
+                      </n-tag>
+                    </n-space>
+                  </template>
 
-              </n-thing>
-            </n-list-item>
+                </n-thing>
+              </n-list-item>
 
-          </n-list>
+            </n-list>
           </n-scrollbar>
         </n-card>
       </div>
