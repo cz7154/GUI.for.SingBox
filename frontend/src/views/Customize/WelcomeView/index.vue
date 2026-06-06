@@ -14,6 +14,7 @@ const router = useRouter()
 
 const showLogoutConfirm = ref(false)
 const updateLoading = ref(false)
+const selectedProxyIds = ref<Record<string, string>>({})
 
 const statistics = ref({
   upload: 0,
@@ -71,6 +72,14 @@ const handleUpdateSub = async (s: Subscription) => {
   } finally {
     updateLoading.value = false
   }
+}
+
+const handleSelectProxy = (subscribeId: string, proxyId: string) => {
+  selectedProxyIds.value[subscribeId] = proxyId
+}
+
+const isSelectedProxy = (subscribeId: string, proxyId: string) => {
+  return selectedProxyIds.value[subscribeId] === proxyId
 }
 
 const handleLogout = () => {
@@ -156,7 +165,14 @@ const handleConfirmLogout = () => {
           </template>
           <n-scrollbar style="max-height: 280px">
             <n-list hoverable clickable>
-              <n-list-item v-for="snode in s.proxies" :key="snode.id">
+              <n-list-item
+                v-for="snode in s.proxies"
+                :key="snode.id"
+                class="cursor-pointer transition-colors"
+                :class="isSelectedProxy(s.id, snode.id) ? 'bg-#18a058/10' : ''"
+                :aria-selected="isSelectedProxy(s.id, snode.id)"
+                @click="handleSelectProxy(s.id, snode.id)"
+              >
                 <!-- <template #prefix>
                     <n-button>Prefix</n-button> 
                      <GameControllerOutline />
