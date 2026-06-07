@@ -17,8 +17,10 @@ const router = useRouter()
 const showLogoutConfirm = ref(false)
 const updateLoading = ref(false)
 const selectedProxyIds = ref<Record<string, string>>({})
+const selectedProxyTag = ref('')
 const proxyDelayMap = ref<Record<string, number>>({})
 const proxyDelayLoadingMap = ref<Record<string, boolean>>({})
+const proxyDelayAllLoading = ref(false)
 
 const statistics = ref({
   upload: 0,
@@ -30,7 +32,7 @@ const userName = computed(() => appSettingsStore.app.userInfo.userName || '用�
 const firstProxyGroup = computed(() => {
   const { proxies } = kernelApiStore
   const groups = Object.values(proxies).filter(
-    (v) => ['Selector', 'URLTest'].includes(v.type) && v.name !== 'GLOBAL',
+    (v) => v.type === 'Selector' && v.name !== 'GLOBAL',
   )
   return groups[0] || proxies.GLOBAL
 })
@@ -46,9 +48,23 @@ onUnmounted(() => {
 })
 
 
+const applySelectedProxy = async () => {
+  if (!selectedProxyTag.value) return
+
+  const group = firstProxyGroup.value
+  if (!group) {
+    message.warn('No proxy group available')
+    return
+  }
+
+  const proxy = kernelApiStore.proxies[selectedProxyTag.value] || { name: selectedProxyTag.value }
+  await handleUseProxy(group, proxy).catch((err: any) => message.error(err.message || err))
+}
+
 const handleStartKernel = async () => {
   try {
     await kernelApiStore.startCore()
+    await applySelectedProxy()
   } catch (error: any) {
     console.error(error)
     message.error(error.message || error)
@@ -88,18 +104,21 @@ const handleUpdateSub = async (s: Subscription) => {
 
 const handleSelectProxy = async (subscribeId: string, proxyId: string, proxyTag: string) => {
   selectedProxyIds.value[subscribeId] = proxyId
-  const group = firstProxyGroup.value
-  if (!group) {
-    message.warn('No proxy group available')
+  selectedProxyTag.value = proxyTag
+
+  if (!kernelApiStore.running) {
+    console.log('eeeeeeeee:',proxyTag)
+    let tip = '已选择:'+proxyTag+' 节点，启动 VPN 后生效'
+    message.success(tip)
     return
   }
 
-  const proxy = kernelApiStore.proxies[proxyTag] || { name: proxyTag }
-  await handleUseProxy(group, proxy).catch((err: any) => message.error(err.message || err))
+  await applySelectedProxy()
 }
 
-const isSelectedProxy = (subscribeId: string, proxyId: string, proxyTag: string) => {
-  return firstProxyGroup.value?.now === proxyTag || selectedProxyIds.value[subscribeId] === proxyId
+const isSelectedProxy = (_subscribeId: string, _proxyId: string, proxyTag: string) => {
+  const currentProxyTag = selectedProxyTag.value || firstProxyGroup.value?.now
+  return currentProxyTag === proxyTag
 }
 
 const getProxyDelayText = (proxyTag: string) => {
@@ -108,6 +127,11 @@ const getProxyDelayText = (proxyTag: string) => {
 }
 
 const handleProxyDelay = async (proxyTag: string) => {
+  if (!kernelApiStore.running) {
+    message.info('请先启动 VPN 后测速')
+    return
+  }
+
   proxyDelayLoadingMap.value[proxyTag] = true
   try {
     const { delay = 0 } = await getProxyDelay(
@@ -124,6 +148,22 @@ const handleProxyDelay = async (proxyTag: string) => {
     message.error(error + ': ' + proxyTag)
   } finally {
     proxyDelayLoadingMap.value[proxyTag] = false
+  }
+}
+
+const handleAllProxyDelay = async (s: Subscription) => {
+  if (!kernelApiStore.running) {
+    message.info('请先启动 VPN 后测速')
+    return
+  }
+
+  proxyDelayAllLoading.value = true
+  try {
+    for (const proxy of s.proxies) {
+      await handleProxyDelay(proxy.tag)
+    }
+  } finally {
+    proxyDelayAllLoading.value = false
   }
 }
 
@@ -207,7 +247,14 @@ const handleConfirmLogout = () => {
           header-style="padding: 10px;font-size: 15px;" segmented>
           <template #header>
             节点列表({{ s.proxies.length }})
-            <n-button type="primary" >一键测速</n-button>
+            <n-button
+              type="primary"
+              size="small"
+              round tertiary 
+              :loading="proxyDelayAllLoading"
+              :disabled="!kernelApiStore.running"
+              @click.stop="handleAllProxyDelay(s)"
+            >一键测速</n-button>
           </template>
           <n-scrollbar style="max-height: 280px">
             <n-list hoverable clickable>
@@ -236,7 +283,7 @@ const handleConfirmLogout = () => {
                         :bordered="false"
                         type="success"
                         size="small"
-                        class="cursor-pointer"
+                        :class="kernelApiStore.running ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
                         @click.stop="handleProxyDelay(snode.tag)"
                       >
                         延迟：{{ proxyDelayLoadingMap[snode.tag] ? '测试中...' : getProxyDelayText(snode.tag) }}
