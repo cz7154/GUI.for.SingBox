@@ -3,8 +3,10 @@ import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar } from 'naive-ui'
+import { getProxyDelay } from '@/api/kernel'
+import { DefaultTestTimeout, DefaultTestURL } from '@/constant/app'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
-import { formatBytes, formatDate, message, APP_TITLE } from '@/utils'
+import { formatBytes, formatDate, message, APP_TITLE, handleUseProxy } from '@/utils'
 import type { Subscription } from '@/types/app'
 const kernelApiStore = useKernelApiStore()
 const appSettingsStore = useAppSettingsStore()
@@ -15,6 +17,8 @@ const router = useRouter()
 const showLogoutConfirm = ref(false)
 const updateLoading = ref(false)
 const selectedProxyIds = ref<Record<string, string>>({})
+const proxyDelayMap = ref<Record<string, number>>({})
+const proxyDelayLoadingMap = ref<Record<string, boolean>>({})
 
 const statistics = ref({
   upload: 0,
@@ -22,6 +26,14 @@ const statistics = ref({
 })
 
 const userName = computed(() => appSettingsStore.app.userInfo.userName || '用户')
+
+const firstProxyGroup = computed(() => {
+  const { proxies } = kernelApiStore
+  const groups = Object.values(proxies).filter(
+    (v) => ['Selector', 'URLTest'].includes(v.type) && v.name !== 'GLOBAL',
+  )
+  return groups[0] || proxies.GLOBAL
+})
 
 const unregisterTrafficHandler = kernelApiStore.onTraffic((data) => {
   const { up, down } = data
@@ -74,12 +86,45 @@ const handleUpdateSub = async (s: Subscription) => {
   }
 }
 
-const handleSelectProxy = (subscribeId: string, proxyId: string) => {
+const handleSelectProxy = async (subscribeId: string, proxyId: string, proxyTag: string) => {
   selectedProxyIds.value[subscribeId] = proxyId
+  const group = firstProxyGroup.value
+  if (!group) {
+    message.warn('No proxy group available')
+    return
+  }
+
+  const proxy = kernelApiStore.proxies[proxyTag] || { name: proxyTag }
+  await handleUseProxy(group, proxy).catch((err: any) => message.error(err.message || err))
 }
 
-const isSelectedProxy = (subscribeId: string, proxyId: string) => {
-  return selectedProxyIds.value[subscribeId] === proxyId
+const isSelectedProxy = (subscribeId: string, proxyId: string, proxyTag: string) => {
+  return firstProxyGroup.value?.now === proxyTag || selectedProxyIds.value[subscribeId] === proxyId
+}
+
+const getProxyDelayText = (proxyTag: string) => {
+  const delay = proxyDelayMap.value[proxyTag]
+  return delay ? `${delay}ms` : '--'
+}
+
+const handleProxyDelay = async (proxyTag: string) => {
+  proxyDelayLoadingMap.value[proxyTag] = true
+  try {
+    const { delay = 0 } = await getProxyDelay(
+      encodeURIComponent(proxyTag),
+      appSettingsStore.app.kernel.testUrl || DefaultTestURL,
+      appSettingsStore.app.kernel.testTimeout || DefaultTestTimeout,
+    )
+    proxyDelayMap.value[proxyTag] = delay
+
+    const proxy = kernelApiStore.proxies[proxyTag]
+    proxy && proxy.history.push({ delay })
+  } catch (error: any) {
+    proxyDelayMap.value[proxyTag] = 0
+    message.error(error + ': ' + proxyTag)
+  } finally {
+    proxyDelayLoadingMap.value[proxyTag] = false
+  }
 }
 
 const handleLogout = () => {
@@ -162,6 +207,7 @@ const handleConfirmLogout = () => {
           header-style="padding: 10px;font-size: 15px;" segmented>
           <template #header>
             节点列表({{ s.proxies.length }})
+            <n-button type="primary" >一键测速</n-button>
           </template>
           <n-scrollbar style="max-height: 280px">
             <n-list hoverable clickable>
@@ -169,9 +215,9 @@ const handleConfirmLogout = () => {
                 v-for="snode in s.proxies"
                 :key="snode.id"
                 class="cursor-pointer transition-colors"
-                :class="isSelectedProxy(s.id, snode.id) ? 'bg-#18a058/10' : ''"
-                :aria-selected="isSelectedProxy(s.id, snode.id)"
-                @click="handleSelectProxy(s.id, snode.id)"
+                :class="isSelectedProxy(s.id, snode.id, snode.tag) ? 'bg-#18a058/10' : ''"
+                :aria-selected="isSelectedProxy(s.id, snode.id, snode.tag)"
+                @click="handleSelectProxy(s.id, snode.id, snode.tag)"
               >
                 <!-- <template #prefix>
                     <n-button>Prefix</n-button> 
@@ -186,8 +232,14 @@ const handleConfirmLogout = () => {
                       <n-tag :bordered="false" type="success" size="small">
                         可用
                       </n-tag>
-                      <n-tag :bordered="false" type="success" size="small">
-                        延迟：23ms
+                      <n-tag
+                        :bordered="false"
+                        type="success"
+                        size="small"
+                        class="cursor-pointer"
+                        @click.stop="handleProxyDelay(snode.tag)"
+                      >
+                        延迟：{{ proxyDelayLoadingMap[snode.tag] ? '测试中...' : getProxyDelayText(snode.tag) }}
                       </n-tag>
                     </n-space>
                   </template>
