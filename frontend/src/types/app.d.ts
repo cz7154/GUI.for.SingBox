@@ -125,6 +125,7 @@ export interface AppSettings {
     nickName: string
     uuid: string
     token: string
+    password: string
   }
 }
 

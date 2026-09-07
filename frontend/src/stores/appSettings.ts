@@ -116,6 +116,7 @@ export const useAppSettingsStore = defineStore('app-settings', () => {
       nickName: '',
       uuid: '',
       token: '',
+      password: '',
   }
   })
 
