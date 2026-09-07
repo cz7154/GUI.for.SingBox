@@ -13,3 +13,5 @@ export const TG_GROUP = import.meta.env.VITE_APP_TG_GROUP
 export const TG_CHANNEL = import.meta.env.VITE_APP_TG_CHANNEL
 
 export const isDev = import.meta.env.DEV
+
+export const APP_CZ_NAME = import.meta.env.VITE_APP_CZ_NAME

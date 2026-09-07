@@ -18,7 +18,7 @@ import {
   useProfilesStore,
   useSubscribesStore,
 } from '@/stores'
-import { message, sampleID,APP_TITLE } from '@/utils'
+import { message, sampleID,APP_CZ_NAME } from '@/utils'
 
 const router = useRouter()
 const subscribeStore = useSubscribesStore()
@@ -32,8 +32,8 @@ const isLoading = ref(true)
 const picPath = ref('')
 
 const loginForm = ref({
-  username: 'test001',
-  password: 'test001',
+  username: '',    // test001
+  password: '',    // test001
   captcha: '',
   captchaId: '',
   openCaptcha: false,
@@ -48,13 +48,17 @@ const handleRegistration = () => {
   message.success('暂未开放注册，敬请期待')
 }
 
+const handleForgetPassword = () => {
+  message.success('暂未开放找回密码，敬请期待')
+}
+
 const handleSave = async () => {
   name.value = 's-ui订阅'
   if (!name.value) {
     name.value = sampleID()
   }
 
-  url.value = 'https://hksui.czvps.top/sub/123?x-token=' + appSettingsStore.app.userInfo.token
+  url.value = 'https://hksui.czvps.top/sub/LiuJJ?x-token=' + appSettingsStore.app.userInfo.token
   const sub = subscribeStore.getSubscribeTemplate(name.value, { url: url.value })
 
   
@@ -94,6 +98,7 @@ const handleSave = async () => {
 }
 
 const loginVerify = async () => {
+  console.log('正在获取验证码')
   isLoading.value = true
   const result = await captcha()
 
@@ -140,7 +145,7 @@ loginVerify()
       >
         <div class="mb-32px text-center">
           <div class="mb-12px text-48px">🔐</div>
-          <h1 class="text-28px text-black font-bold tracking-tight">{{ APP_TITLE }}</h1>
+          <h1 class="text-28px text-black font-bold tracking-tight">{{ APP_CZ_NAME }}</h1>
           <p class="mt-6px text-15px text-gray-400">SECURE • FAST • PRIVATE</p>
         </div>
 
@@ -160,6 +165,7 @@ loginVerify()
               v-model:value="loginForm.password"
               placeholder="请输入密码"
               type="password"
+              clearable 
               size="large"
               show-password-on="click"
             />
@@ -182,7 +188,7 @@ loginVerify()
 
           <div class="mb-28px flex items-center justify-between">
             <n-checkbox v-model:checked="loginForm.remember">记住登录</n-checkbox>
-            <n-button text type="primary" size="small" class="text-14px" @click="toWelcome">
+            <n-button text type="primary" size="small" class="text-14px" @click="handleForgetPassword">
               忘记密码？
             </n-button>
           </div>

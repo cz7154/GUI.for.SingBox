@@ -2,11 +2,11 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode } from 'naive-ui'
 import { getProxyDelay } from '@/api/kernel'
 import { DefaultTestTimeout, DefaultTestURL } from '@/constant/app'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
-import { formatBytes, formatDate, message, APP_TITLE, handleUseProxy } from '@/utils'
+import { formatBytes, formatDate, message, APP_CZ_NAME, handleUseProxy } from '@/utils'
 import type { Subscription } from '@/types/app'
 const kernelApiStore = useKernelApiStore()
 const appSettingsStore = useAppSettingsStore()
@@ -172,18 +172,21 @@ const handleLogout = () => {
 }
 
 const handleConfirmLogout = () => {
+  if (kernelApiStore.running) {
+    handleStopKernel()
+  }
   showLogoutConfirm.value = false
   router.push({ name: 'Login' })
 }
 </script>
 
 <template>
-  <div class="p-24px">
+  <div class="p-5px">
     <n-card v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false"
       class="mb-32px overflow-hidden rounded-20px shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]" content-class="p-0!">
       <div class="bg-gradient-to-r from-#6D28D9 to-#18a058 px-32px py-24px text-white ">
         <div class="flex items-center">
-          <div class="flex-1 m-0 text-28px font-semibold">欢迎来到 {{ APP_TITLE }}</div>
+          <div class="flex-1 m-0 text-28px font-semibold">欢迎来到 {{ APP_CZ_NAME }}</div>
           <div class="">
             <n-button type="error" size="small" @click="handleLogout">
               <template #icon>
@@ -214,8 +217,29 @@ const handleConfirmLogout = () => {
 
               </div>
             </div>
+                         <!-- 手机二维码 -->
+            <div>
+                  <n-popover trigger="click">
+                    <template #trigger>
+                      <n-button  size="tiny" type="primary">手机上使用？</n-button>
+                    </template>
+                    <div class="max-w-240px ">
+                          <div class="text-12px">请使用您的iphone中的Shadowrocket App扫描下面二维码</div>
+                          <div class="text-center">
+                             <n-qr-code  icon-src="@/assets/icon/icon.ico" 
+                             icon-background-color="red"
+                            value="https://hksui.czvps.top/sub/LiuJJ"
+                            error-correction-level="H"
+                          />
+                          </div>
+
+                    </div>
+                  </n-popover>
+                 
+            </div>
 
           </div>
+
         </div>
 
 
@@ -276,8 +300,11 @@ const handleConfirmLogout = () => {
                       <n-tag :bordered="false" type="info" size="small">
                         CN2 GIA
                       </n-tag>
-                      <n-tag :bordered="false" type="success" size="small">
+                      <n-tag v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false" type="success" size="small">
                         可用
+                      </n-tag>
+                       <n-tag  v-if="getProxyDelayText(snode.tag) === '--'" :bordered="false" type="error" size="small">
+                        不可用
                       </n-tag>
                       <n-tag
                         :bordered="false"
@@ -307,7 +334,7 @@ const handleConfirmLogout = () => {
 
     <n-modal v-model:show="showLogoutConfirm" preset="dialog" title="提示" positive-text="确认" negative-text="取消"
       @positive-click="handleConfirmLogout">
-      是否退出登录
+      退出登录后将停止 VPN 连接，是否继续？
     </n-modal>
   </div>
 </template>

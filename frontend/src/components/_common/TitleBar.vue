@@ -13,7 +13,7 @@ import {
 } from '@/bridge'
 import { OS } from '@/enums/app'
 import { useAppSettingsStore, useKernelApiStore, useEnvStore, useAppStore } from '@/stores'
-import { APP_TITLE, APP_VERSION, debounce, exitApp, reloadApp } from '@/utils'
+import { APP_TITLE, APP_VERSION, debounce, exitApp, reloadApp,APP_CZ_NAME } from '@/utils'
 
 import type { Menu } from '@/types/app'
 
@@ -79,7 +79,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
       class="font-bold w-full h-full flex items-center"
       @dblclick="WindowToggleMaximise"
     >
-      {{ APP_TITLE }} {{ APP_VERSION }}
+      {{ APP_CZ_NAME }} {{ APP_VERSION }}
       <CustomAction :actions="appStore.customActions.title_bar" />
       <Icon
         v-if="kernelApiStore.starting || kernelApiStore.stopping || kernelApiStore.restarting"
