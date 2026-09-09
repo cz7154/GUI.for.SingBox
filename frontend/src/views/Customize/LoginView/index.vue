@@ -53,6 +53,7 @@ const handleRegistration = () => {
 
 const handleForgetPassword = () => {
   message.success('暂未开放找回密码，敬请期待')
+  toWelcome()
 }
 
 const handleSave = async () => {

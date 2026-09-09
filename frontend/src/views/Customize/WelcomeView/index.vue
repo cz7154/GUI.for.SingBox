@@ -2,7 +2,15 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown,NIcon } from 'naive-ui'
+import type { Component } from 'vue'
+import {
+  Pencil as EditIcon,
+  LogOutOutline as LogoutIcon,
+  PersonCircleOutline as UserIcon,
+  Settings as SettingsIcon,
+} from '@vicons/ionicons5'
+
 import { getProxyDelay } from '@/api/kernel'
 import { DefaultTestTimeout, DefaultTestURL } from '@/constant/app'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
@@ -107,8 +115,8 @@ const handleSelectProxy = async (subscribeId: string, proxyId: string, proxyTag:
   selectedProxyTag.value = proxyTag
 
   if (!kernelApiStore.running) {
-    console.log('eeeeeeeee:',proxyTag)
-    let tip = '已选择:'+proxyTag+' 节点，启动 VPN 后生效'
+    console.log('eeeeeeeee:', proxyTag)
+    let tip = '已选择:' + proxyTag + ' 节点，启动 VPN 后生效'
     message.success(tip)
     return
   }
@@ -178,35 +186,73 @@ const handleConfirmLogout = () => {
   showLogoutConfirm.value = false
   router.push({ name: 'Login' })
 }
+function renderIcon(icon: Component) {
+  return () => {
+    return h(NIcon, null, {
+      default: () => h(icon)
+    })
+  }
+}
+const options = [
+  {
+    label: '用户资料',
+    key: 'profile',
+    icon: renderIcon(UserIcon)
+  },
+  {
+    label: '版本更新',
+    key: 'editProfile',
+    icon: renderIcon(EditIcon)
+  },
+  {
+    label: '退出登录',
+    key: 'logout',
+    icon: renderIcon(LogoutIcon),
+  }
+]
+const handleSelect = (key: string) => {
+  console.log('点击了：', key)
+
+  if (key === 'logout') {
+    handleLogout()
+  }
+}
 </script>
 
 <template>
   <div class="p-5px">
-    <n-card v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false"
-      class="mb-32px overflow-hidden rounded-20px shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]" content-class="p-0!">
+    <div v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false"
+      class="mb-32px overflow-hidden rounded-20px " content-class="p-0!">
       <div class="bg-gradient-to-r from-#6D28D9 to-#18a058 px-32px py-24px text-white ">
         <div class="flex items-center">
-          <div class="flex-1 m-0 text-28px font-semibold">欢迎来到 {{ APP_CZ_NAME }}</div>
+          <div class="flex-1 m-0 text-12px font-semibold">欢迎来到 {{ APP_CZ_NAME }}</div>
           <div class="">
-            <n-button type="error" size="small" @click="handleLogout">
-              <template #icon>
-                <Icon icon="close" />
-              </template>
-              注销
-            </n-button>
+            <n-dropdown trigger="click" :options="options" @select="handleSelect">
+              <!-- @click="handleLogout" -->
+              <n-button type="info" size="small" >
+                <template #icon>
+                  <!-- <Icon icon="SettingsIcon" /> -->
+                  <SettingsIcon></SettingsIcon>
+                </template>
+                设置
+              </n-button>
+            </n-dropdown>
           </div>
         </div>
         <!-- 用户信息 -->
-        <div class="w-full mt-6 flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-4">
-          <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
+        <div class="mt-6 flex items-center gap-4  ">
+          <!-- <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
             👤
-          </div>
+          </div> -->
           <div class="">
-            <div class="ml-10px pb-5px text-lg font-medium">{{ userName }}</div>
-            <div class="rounded-2 bg-white/25 px-12px py-4px text-13px mb-10px">
+            <div class="flex items-center">
+              <div class="text-lg">👤</div>
+              <div class="ml-10px pb-5px text-16px font-medium">{{ userName }}</div>
+            </div>
+            <div class="  py-4px text-13px mb-6px">
               <div>{{ t('subscribes.expire') }}：{{ s.expire ? formatDate(s.expire, 'YYYY-MM-DD HH:mm:ss') : '--' }}
               </div>
-              <div> <span >实时流量 ：</span>
+              <div> <span>实时流量 ：</span>
                 <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
                 <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
@@ -217,25 +263,31 @@ const handleConfirmLogout = () => {
 
               </div>
             </div>
-                         <!-- 手机二维码 -->
+            <!-- 手机二维码 -->
             <div>
-                  <n-popover trigger="click">
-                    <template #trigger>
-                      <n-button  size="tiny" type="primary">手机上使用？</n-button>
-                    </template>
-                    <div class="max-w-240px ">
-                          <div class="text-12px">请使用您的iphone中的Shadowrocket App扫描下面二维码</div>
-                          <div class="text-center">
-                             <n-qr-code  icon-src="@/assets/icon/icon.ico" 
-                             icon-background-color="red"
-                            value="https://hksui.czvps.top/sub/LiuJJ"
-                            error-correction-level="H"
-                          />
-                          </div>
+              <n-popover trigger="click">
+                <template #trigger>
+                  <n-button size="tiny" type="primary">手机上使用？</n-button>
+                </template>
+                <div class="max-w-240px ">
+                  <div class="text-12px">请使用您的iphone中的Shadowrocket App扫描下面二维码</div>
+                  <div class="text-center">
+                    <n-qr-code icon-src="@/assets/icon/icon.ico" icon-background-color="red"
+                      value="https://hksui.czvps.top/sub/LiuJJ" error-correction-level="H" />
+                  </div>
 
-                    </div>
-                  </n-popover>
-                 
+                </div>
+              </n-popover>
+                        <!-- <n-button   :loading="updateLoading" class=" rounded-12px px-8px"
+            @click="handleUpdateSub(s)">
+            <div>
+              <div class="text-12px text-white font-semibold mb-5px">更新订阅</div>
+              <div class="ml-8px text-10px text-white opacity-70">
+                {{ s.updateTime ? formatDate(s.updateTime, 'YYYY-MM-DD HH:mm:ss') : '--' }}
+              </div>
+            </div>
+          </n-button> -->
+
             </div>
 
           </div>
@@ -247,7 +299,7 @@ const handleConfirmLogout = () => {
 
       </div>
 
-      <div class="px-32px py-32px">
+      <div class="px-12px py-12px">
         <div class="mb-24px flex flex-col gap-14px md:flex-row md:items-center md:justify-between">
           <n-button :type="kernelApiStore.running ? 'error' : 'primary'" size="large" :loading="kernelApiStore.starting"
             class="h-50px rounded-14px px-28px text-18px font-semibold" @click="handleToggleKernel">
@@ -271,25 +323,16 @@ const handleConfirmLogout = () => {
           header-style="padding: 10px;font-size: 15px;" segmented>
           <template #header>
             节点列表({{ s.proxies.length }})
-            <n-button
-              type="primary"
-              size="small"
-              round tertiary 
-              :loading="proxyDelayAllLoading"
-              :disabled="!kernelApiStore.running"
-              @click.stop="handleAllProxyDelay(s)"
-            >一键测速</n-button>
+            <n-button type="primary" size="small" round tertiary :loading="proxyDelayAllLoading"
+              :disabled="!kernelApiStore.running" @click.stop="handleAllProxyDelay(s)">一键测速</n-button>
+
           </template>
           <n-scrollbar style="max-height: 280px">
             <n-list hoverable clickable>
-              <n-list-item
-                v-for="snode in s.proxies"
-                :key="snode.id"
-                class="cursor-pointer transition-colors"
+              <n-list-item v-for="snode in s.proxies" :key="snode.id" class="cursor-pointer transition-colors"
                 :class="isSelectedProxy(s.id, snode.id, snode.tag) ? 'bg-#18a058/10' : ''"
                 :aria-selected="isSelectedProxy(s.id, snode.id, snode.tag)"
-                @click="handleSelectProxy(s.id, snode.id, snode.tag)"
-              >
+                @click="handleSelectProxy(s.id, snode.id, snode.tag)">
                 <!-- <template #prefix>
                     <n-button>Prefix</n-button> 
                      <GameControllerOutline />
@@ -303,16 +346,12 @@ const handleConfirmLogout = () => {
                       <n-tag v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false" type="success" size="small">
                         可用
                       </n-tag>
-                       <n-tag  v-if="getProxyDelayText(snode.tag) === '--'" :bordered="false" type="error" size="small">
+                      <n-tag v-if="getProxyDelayText(snode.tag) === '--'" :bordered="false" type="error" size="small">
                         不可用
                       </n-tag>
-                      <n-tag
-                        :bordered="false"
-                        type="success"
-                        size="small"
+                      <n-tag :bordered="false" type="success" size="small"
                         :class="kernelApiStore.running ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
-                        @click.stop="handleProxyDelay(snode.tag)"
-                      >
+                        @click.stop="handleProxyDelay(snode.tag)">
                         延迟：{{ proxyDelayLoadingMap[snode.tag] ? '测试中...' : getProxyDelayText(snode.tag) }}
                       </n-tag>
                     </n-space>
@@ -325,7 +364,7 @@ const handleConfirmLogout = () => {
           </n-scrollbar>
         </n-card>
       </div>
-    </n-card>
+    </div>
 
     <n-card v-if="!subscribeStore.subscribes.length" :bordered="false" class="rounded-20px text-center">
       <div class="py-42px text-#666">暂无订阅，请先登录或添加订阅。</div>
