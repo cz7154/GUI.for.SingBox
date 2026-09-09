@@ -2,7 +2,7 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown,NIcon } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon } from 'naive-ui'
 import type { Component } from 'vue'
 import {
   Pencil as EditIcon,
@@ -229,7 +229,7 @@ const handleSelect = (key: string) => {
           <div class="">
             <n-dropdown trigger="click" :options="options" @select="handleSelect">
               <!-- @click="handleLogout" -->
-              <n-button type="info" size="small" >
+              <n-button type="info" size="small">
                 <template #icon>
                   <!-- <Icon icon="SettingsIcon" /> -->
                   <SettingsIcon></SettingsIcon>
@@ -256,11 +256,25 @@ const handleSelect = (key: string) => {
                 <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
                 <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
-              <div> <span>{{ t('subscribes.total') }}：{{ formatBytes(s.download + s.upload, 2) }}</span>
+              <div> 
+                <!-- <span>{{ t('subscribes.total') }}：{{ formatBytes(s.download + s.upload, 2) }}</span>
                 <span class="ml-3px text-10px">( ↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
                   ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }} )</span>
-                <span class="mx-2">/ {{ s.total ? formatBytes(s.total, 2) : '--' }}</span>
+                <span class="mx-2">/ {{ s.total ? formatBytes(s.total, 2) : '--' }}</span> -->
+                <div>
+                  <span>{{ t('subscribes.total') }}：</span>
+                  <n-popover trigger="hover">
+                    <template #trigger>
 
+                      <n-button secondary strong size="small" class="text-13px  text-white">{{ formatBytes(s.download + s.upload, 2)
+                        }}</n-button>
+
+                    </template>
+                    <span>↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
+                      ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }}</span>
+                  </n-popover>
+                  <span class="mx-2">/ {{ s.total ? formatBytes(s.total, 2) : '--' }}</span>
+                </div>
               </div>
             </div>
             <!-- 手机二维码 -->
@@ -278,7 +292,7 @@ const handleSelect = (key: string) => {
 
                 </div>
               </n-popover>
-                        <!-- <n-button   :loading="updateLoading" class=" rounded-12px px-8px"
+              <!-- <n-button   :loading="updateLoading" class=" rounded-12px px-8px"
             @click="handleUpdateSub(s)">
             <div>
               <div class="text-12px text-white font-semibold mb-5px">更新订阅</div>
