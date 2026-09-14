@@ -2,7 +2,7 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NFloatButton, NBadge } from 'naive-ui'
 import type { Component } from 'vue'
 import {
   Pencil as EditIcon,
@@ -220,10 +220,10 @@ const handleSelect = (key: string) => {
 </script>
 
 <template>
-  <div class="p-5px">
+  <div class="">
     <div v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false"
       class="mb-32px overflow-hidden rounded-20px " content-class="p-0!">
-      <div class="bg-gradient-to-r from-#6D28D9 to-#18a058 px-32px py-24px text-white ">
+      <div class="bg-#18a058 px-32px py-24px text-white ">
         <div class="flex items-center">
           <div class="flex-1 m-0 text-12px font-semibold">欢迎来到 {{ APP_CZ_NAME }}</div>
           <div class="">
@@ -231,19 +231,26 @@ const handleSelect = (key: string) => {
               <!-- @click="handleLogout" -->
               <n-button type="info" size="small">
                 <template #icon>
-                  <!-- <Icon icon="SettingsIcon" /> -->
                   <SettingsIcon></SettingsIcon>
                 </template>
                 设置
               </n-button>
+              <!-- <n-float-button position="relative">
+                      <template #description>
+        设置
+      </template>
+                <n-badge dot :offset="[4, -4]">
+                  <n-icon>
+                    <SettingsIcon />
+                  </n-icon>
+                </n-badge>
+              </n-float-button> -->
             </n-dropdown>
           </div>
         </div>
         <!-- 用户信息 -->
         <div class="mt-6 flex items-center gap-4  ">
-          <!-- <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
-            👤
-          </div> -->
+
           <div class="">
             <div class="flex items-center">
               <div class="text-lg">👤</div>
@@ -256,7 +263,7 @@ const handleSelect = (key: string) => {
                 <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
                 <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
-              <div> 
+              <div>
                 <!-- <span>{{ t('subscribes.total') }}：{{ formatBytes(s.download + s.upload, 2) }}</span>
                 <span class="ml-3px text-10px">( ↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
                   ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }} )</span>
@@ -266,7 +273,8 @@ const handleSelect = (key: string) => {
                   <n-popover trigger="hover">
                     <template #trigger>
 
-                      <n-button secondary strong size="small" class="text-13px  text-white">{{ formatBytes(s.download + s.upload, 2)
+                      <n-button secondary strong size="small" class="text-13px  text-white">{{ formatBytes(s.download +
+                        s.upload, 2)
                         }}</n-button>
 
                     </template>
@@ -281,7 +289,7 @@ const handleSelect = (key: string) => {
             <div>
               <n-popover trigger="click">
                 <template #trigger>
-                  <n-button size="tiny" type="primary">手机上使用？</n-button>
+                  <n-button size="tiny" type="warning">手机上使用？</n-button>
                 </template>
                 <div class="max-w-240px ">
                   <div class="text-12px">请使用您的iphone中的Shadowrocket App扫描下面二维码</div>

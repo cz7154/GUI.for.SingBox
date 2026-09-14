@@ -47,6 +47,10 @@ const toWelcome = () => {
   router.push('/welcome')
 }
 
+const toHome = () => {
+  router.push('/Overview')
+}
+
 const handleRegistration = () => {
   message.success('暂未开放注册，敬请期待')
 }
@@ -213,7 +217,7 @@ init()
             立即登录
           </n-button>
 
-          <div class="mt-8px text-center text-14px text-gray-400">
+          <div class="mt-8px text-center text-14px text-gray-400" @click="toHome" >
             还没有账号？
             <n-button text type="primary" size="small" class="ml-4px" @click="handleRegistration">
               立即注册
