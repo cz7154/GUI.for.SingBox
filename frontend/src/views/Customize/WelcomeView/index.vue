@@ -37,6 +37,8 @@ const statistics = ref({
 
 const userName = computed(() => appSettingsStore.app.userInfo.userName || '用户')
 
+const userSubUrl = computed(() => appSettingsStore.app.userInfo.userSubUrl || '')
+
 const firstProxyGroup = computed(() => {
   const { proxies } = kernelApiStore
   const groups = Object.values(proxies).filter(
@@ -116,7 +118,7 @@ const handleSelectProxy = async (subscribeId: string, proxyId: string, proxyTag:
 
   if (!kernelApiStore.running) {
     console.log('eeeeeeeee:', proxyTag)
-    let tip = '已选择:' + proxyTag + ' 节点，启动 VPN 后生效'
+    let tip = `已选择: ${proxyTag} 节点，启动 VPN 后生效`
     message.success(tip)
     return
   }
@@ -295,7 +297,7 @@ const handleSelect = (key: string) => {
                   <div class="text-12px">请使用您的iphone中的Shadowrocket App扫描下面二维码</div>
                   <div class="text-center">
                     <n-qr-code icon-src="@/assets/icon/icon.ico" icon-background-color="red"
-                      value="https://hksui.czvps.top/sub/LiuJJ" error-correction-level="H" />
+                      :value="userSubUrl" error-correction-level="H" />
                   </div>
 
                 </div>

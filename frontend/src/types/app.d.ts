@@ -126,6 +126,7 @@ export interface AppSettings {
     uuid: string
     token: string
     password: string
+    userSubUrl: string
   }
 }
 

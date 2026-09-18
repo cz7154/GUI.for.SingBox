@@ -19,6 +19,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       name: 'router.login',
       icon: 'loginview',
+      hideNav: true,
     },
   },
       {
@@ -28,6 +29,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       name: 'router.welcomeView',
       icon: 'welcomeview',
+      hideNav: true,
     },
   },
   {

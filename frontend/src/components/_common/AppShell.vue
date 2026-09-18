@@ -4,14 +4,19 @@ import { useRouter } from 'vue-router'
 import { NavigationBar, TitleBar } from '@/components'
 
 const router = useRouter()
+
 // czcz监听路由变化，判断是否显示导航栏
+// const hasNav = computed(() => {
+//   if(router.currentRoute.value.path === '/Welcome' || router.currentRoute.value.path === '/' ){
+//     return false
+//   }
+//   return true
+// }
+// )
+
 const hasNav = computed(() => {
-  if(router.currentRoute.value.path === '/Welcome' || router.currentRoute.value.path === '/' ){
-    return false
-  }
-  return true
-}
-)
+  return !router.currentRoute.value.meta.hideNav
+})
 
 </script>
 

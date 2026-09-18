@@ -27,8 +27,6 @@ const profilesStore = useProfilesStore()
 const appSettingsStore = useAppSettingsStore()
 
 const url = ref('')
-const userSubUrl = ref('')
-
 const name = ref('')
 const loading = ref(false)
 const isLoading = ref(true)
@@ -60,13 +58,13 @@ const handleForgetPassword = () => {
   toWelcome()
 }
 
-const handleSave = async () => {
+const handleSave = async (userName: string) => {
   name.value = 's-ui订阅'
   if (!name.value) {
     name.value = sampleID()
   }
-  userSubUrl.value = 'https://hksui.czvps.top/sub/LiuJJ'
-  url.value = 'https://hksui.czvps.top/sub/LiuJJ?x-token=' + appSettingsStore.app.userInfo.token
+
+  url.value = `${appSettingsStore.app.userInfo.userSubUrl}?x-token=${appSettingsStore.app.userInfo.token}`
   const sub = subscribeStore.getSubscribeTemplate(name.value, { url: url.value })
 
 
@@ -127,6 +125,7 @@ const loginIn = async () => {
     if (result.code == 0) {
       appSettingsStore.app.userInfo.token = result.data.token
       appSettingsStore.app.userInfo.userName = result.data.user.userName
+      appSettingsStore.app.userInfo.userSubUrl = `https://hksui.czvps.top/sub/${result.data.user.userName}`
       // 记住账户密码
       if (loginForm.value.remember) {
         appSettingsStore.app.userInfo.password = loginForm.value.password
@@ -134,7 +133,7 @@ const loginIn = async () => {
         appSettingsStore.app.userInfo.password = ''
       }
 
-      await handleSave()
+      await handleSave(result.data.user.userName)
       toWelcome()
     } else {
       message.error(result.msg)
