@@ -216,9 +216,9 @@ init()
             立即登录
           </n-button>
 
-          <div class="mt-8px text-center text-14px text-gray-400" @click="toHome" >
+          <div class="mt-8px text-center text-14px text-gray-400"  >
             还没有账号？
-            <n-button text type="primary" size="small" class="ml-4px" @click="handleRegistration">
+            <n-button text type="primary" size="small" class="ml-4px" @click="toHome" >
               立即注册
             </n-button>
           </div>

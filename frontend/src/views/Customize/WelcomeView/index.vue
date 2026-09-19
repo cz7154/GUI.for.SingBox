@@ -323,8 +323,8 @@ const handleSelect = (key: string) => {
 
       </div>
 
-      <div class="px-12px py-12px">
-        <div class="mb-24px flex flex-col gap-14px md:flex-row md:items-center md:justify-between">
+      <div class="px-10px py-10px">
+        <div class="mb-12px flex flex-col gap-10px md:flex-row md:items-center md:justify-between">
           <n-button :type="kernelApiStore.running ? 'error' : 'primary'" size="large" :loading="kernelApiStore.starting"
             class="h-50px rounded-14px px-28px text-18px font-semibold" @click="handleToggleKernel">
             {{ kernelApiStore.running ? '停止 VPN 连接' : '开启 VPN 连接' }}
@@ -343,8 +343,8 @@ const handleSelect = (key: string) => {
 
         <!-- 节点列表 -->
         <!-- <div>节点列表</div> -->
-        <n-card content-style="padding: 0;max-height: 280px;" :bordered="false"
-          header-style="padding: 10px;font-size: 15px;" segmented>
+        <n-card content-style="padding: 0px;max-height: 280px;" :bordered="false"
+          header-style="padding: 8px;font-size: 13px;" segmented>
           <template #header>
             节点列表({{ s.proxies.length }})
             <n-button type="primary" size="small" round tertiary :loading="proxyDelayAllLoading"
@@ -361,19 +361,20 @@ const handleSelect = (key: string) => {
                     <n-button>Prefix</n-button> 
                      <GameControllerOutline />
                 </template> -->
-                <n-thing :title="snode.tag" content-style="margin-top: 10px;">
+                <n-thing  content-style="margin-top: 5px;">
+                  <template #header><div class="text-12px">{{ snode.tag }}</div></template>
                   <template #description>
-                    <n-space size="medium" style="margin-top: 4px">
-                      <n-tag :bordered="false" type="info" size="small">
+                    <n-space size="medium" style="margin-top: 4px;">
+                      <n-tag class="text-10px" :bordered="false"  type="info" size="small">
                         CN2 GIA
                       </n-tag>
-                      <n-tag v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false" type="success" size="small">
+                      <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false" type="success" size="small">
                         可用
                       </n-tag>
-                      <n-tag v-if="getProxyDelayText(snode.tag) === '--'" :bordered="false" type="error" size="small">
+                      <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) === '--'" :bordered="false" type="error" size="small">
                         不可用
                       </n-tag>
-                      <n-tag :bordered="false" type="success" size="small"
+                      <n-tag class="text-10px" :bordered="false" type="success" size="small"
                         :class="kernelApiStore.running ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
                         @click.stop="handleProxyDelay(snode.tag)">
                         延迟：{{ proxyDelayLoadingMap[snode.tag] ? '测试中...' : getProxyDelayText(snode.tag) }}
