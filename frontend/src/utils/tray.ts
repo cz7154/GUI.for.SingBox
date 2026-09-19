@@ -25,6 +25,7 @@ import {
   APP_TITLE,
   APP_VERSION,
   handleUseProxy,
+  APP_CZ_NAME
 } from '@/utils'
 
 import type { MenuItem } from '@/types/app'
@@ -186,138 +187,138 @@ const getTrayMenus = () => {
       type: 'separator',
       hidden: envStore.env.os === OS.Windows,
     },
-    {
-      type: 'item',
-      text: 'kernel.mode',
-      hidden: !kernelApiStore.running,
-      children: ModeOptions.map((mode) => ({
-        type: 'item',
-        text: mode.label,
-        checkable: true,
-        checked: kernelApiStore.config.mode === mode.value,
-        event: () => handleChangeMode(mode.value),
-      })),
-    },
-    {
-      type: 'item',
-      text: 'tray.proxyGroup',
-      hidden: groupMenusHidden || !kernelApiStore.running,
-      children: groupMenus,
-    },
-    {
-      type: 'item',
-      text: 'tray.kernel',
-      children: [
-        {
-          type: 'item',
-          text: 'tray.startKernel',
-          hidden: kernelApiStore.running,
-          event: kernelApiStore.startCore,
-        },
-        {
-          type: 'item',
-          text: 'tray.restartKernel',
-          hidden: !kernelApiStore.running,
-          event: kernelApiStore.restartCore,
-        },
-        {
-          type: 'item',
-          text: 'tray.stopKernel',
-          hidden: !kernelApiStore.running,
-          event: kernelApiStore.stopCore,
-        },
-      ],
-    },
-    {
-      type: 'separator',
-      hidden: !kernelApiStore.running,
-    },
-    {
-      type: 'item',
-      text: 'tray.proxy',
-      hidden: !kernelApiStore.running,
-      children: [
-        {
-          type: 'item',
-          text: 'tray.setSystemProxy',
-          hidden: envStore.systemProxy,
-          event: envStore.setSystemProxy,
-        },
-        {
-          type: 'item',
-          text: 'tray.clearSystemProxy',
-          hidden: !envStore.systemProxy,
-          event: envStore.clearSystemProxy,
-        },
-      ],
-    },
-    {
-      type: 'item',
-      text: 'tray.tun',
-      hidden: !kernelApiStore.running,
-      children: [
-        {
-          type: 'item',
-          text: 'tray.enableTunMode',
-          hidden: kernelApiStore.config.tun.enable,
-          event: () => kernelApiStore.updateConfig('tun', { enable: true }),
-        },
-        {
-          type: 'item',
-          text: 'tray.disableTunMode',
-          hidden: !kernelApiStore.config.tun.enable,
-          event: () => kernelApiStore.updateConfig('tun', { enable: false }),
-        },
-      ],
-    },
-    {
-      type: 'item',
-      text: 'settings.general',
-      children: [
-        {
-          type: 'item',
-          text: 'settings.theme.name',
-          children: ThemeOptions.map((theme) => ({
-            type: 'item',
-            text: theme.label,
-            checkable: true,
-            checked: appSettings.app.theme === theme.value,
-            event: () => (appSettings.app.theme = theme.value),
-          })),
-        },
-        {
-          type: 'item',
-          text: 'settings.color.name',
-          children: ColorOptions.map((color) => ({
-            type: 'item',
-            text: color.label,
-            checkable: true,
-            checked: appSettings.app.color === color.value,
-            event: () => (appSettings.app.color = color.value),
-          })),
-        },
-        {
-          type: 'item',
-          text: 'settings.lang.name',
-          children: appStore.locales.map((v) => ({
-            type: 'item',
-            text: v.label,
-            checkable: true,
-            checked: appSettings.app.lang === v.value,
-            event: () => (appSettings.app.lang = v.value),
-          })),
-        },
-      ],
-    },
-    {
-      type: 'item',
-      text: 'tray.plugins',
-      hidden: pluginMenusHidden,
-      children: pluginMenus,
-    },
-    {
-      type: 'separator',
-    },
+    // {
+    //   type: 'item',
+    //   text: 'kernel.mode',
+    //   hidden: !kernelApiStore.running,
+    //   children: ModeOptions.map((mode) => ({
+    //     type: 'item',
+    //     text: mode.label,
+    //     checkable: true,
+    //     checked: kernelApiStore.config.mode === mode.value,
+    //     event: () => handleChangeMode(mode.value),
+    //   })),
+    // },
+    // {
+    //   type: 'item',
+    //   text: 'tray.proxyGroup',
+    //   hidden: groupMenusHidden || !kernelApiStore.running,
+    //   children: groupMenus,
+    // },
+    // {
+    //   type: 'item',
+    //   text: 'tray.kernel',
+    //   children: [
+    //     {
+    //       type: 'item',
+    //       text: 'tray.startKernel',
+    //       hidden: kernelApiStore.running,
+    //       event: kernelApiStore.startCore,
+    //     },
+    //     {
+    //       type: 'item',
+    //       text: 'tray.restartKernel',
+    //       hidden: !kernelApiStore.running,
+    //       event: kernelApiStore.restartCore,
+    //     },
+    //     {
+    //       type: 'item',
+    //       text: 'tray.stopKernel',
+    //       hidden: !kernelApiStore.running,
+    //       event: kernelApiStore.stopCore,
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: 'separator',
+    //   hidden: !kernelApiStore.running,
+    // },
+    // {
+    //   type: 'item',
+    //   text: 'tray.proxy',
+    //   hidden: !kernelApiStore.running,
+    //   children: [
+    //     {
+    //       type: 'item',
+    //       text: 'tray.setSystemProxy',
+    //       hidden: envStore.systemProxy,
+    //       event: envStore.setSystemProxy,
+    //     },
+    //     {
+    //       type: 'item',
+    //       text: 'tray.clearSystemProxy',
+    //       hidden: !envStore.systemProxy,
+    //       event: envStore.clearSystemProxy,
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: 'item',
+    //   text: 'tray.tun',
+    //   hidden: !kernelApiStore.running,
+    //   children: [
+    //     {
+    //       type: 'item',
+    //       text: 'tray.enableTunMode',
+    //       hidden: kernelApiStore.config.tun.enable,
+    //       event: () => kernelApiStore.updateConfig('tun', { enable: true }),
+    //     },
+    //     {
+    //       type: 'item',
+    //       text: 'tray.disableTunMode',
+    //       hidden: !kernelApiStore.config.tun.enable,
+    //       event: () => kernelApiStore.updateConfig('tun', { enable: false }),
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: 'item',
+    //   text: 'settings.general',
+    //   children: [
+    //     {
+    //       type: 'item',
+    //       text: 'settings.theme.name',
+    //       children: ThemeOptions.map((theme) => ({
+    //         type: 'item',
+    //         text: theme.label,
+    //         checkable: true,
+    //         checked: appSettings.app.theme === theme.value,
+    //         event: () => (appSettings.app.theme = theme.value),
+    //       })),
+    //     },
+    //     {
+    //       type: 'item',
+    //       text: 'settings.color.name',
+    //       children: ColorOptions.map((color) => ({
+    //         type: 'item',
+    //         text: color.label,
+    //         checkable: true,
+    //         checked: appSettings.app.color === color.value,
+    //         event: () => (appSettings.app.color = color.value),
+    //       })),
+    //     },
+    //     {
+    //       type: 'item',
+    //       text: 'settings.lang.name',
+    //       children: appStore.locales.map((v) => ({
+    //         type: 'item',
+    //         text: v.label,
+    //         checkable: true,
+    //         checked: appSettings.app.lang === v.value,
+    //         event: () => (appSettings.app.lang = v.value),
+    //       })),
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: 'item',
+    //   text: 'tray.plugins',
+    //   hidden: pluginMenusHidden,
+    //   children: pluginMenus,
+    // },
+    // {
+    //   type: 'separator',
+    // },
     {
       type: 'item',
       text: 'tray.restart',
@@ -343,7 +344,7 @@ export const updateTrayAndMenus = debounce(async () => {
   const isDarwin = useEnvStore().env.os === OS.Darwin
   const title = isDarwin ? '' : APP_TITLE
 
-  const tray = { icon: trayIcons, title, tooltip: APP_TITLE + ' ' + APP_VERSION }
+  const tray = { icon: trayIcons, title, tooltip: APP_CZ_NAME + ' ' + APP_VERSION }
 
   const [finalTray, finalMenus] = await pluginsStore.onTrayUpdateTrigger(tray, trayMenus)
 
