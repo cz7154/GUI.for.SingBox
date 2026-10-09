@@ -57,6 +57,9 @@ onUnmounted(() => {
   unregisterTrafficHandler()
 })
 
+const toHome = () => {
+  router.push('/Overview')
+}
 
 const applySelectedProxy = async () => {
   if (!selectedProxyTag.value) return
@@ -195,28 +198,26 @@ function renderIcon(icon: Component) {
     })
   }
 }
-const options = [
-  {
-    label: '用户资料',
-    key: 'profile',
-    icon: renderIcon(UserIcon)
-  },
-  {
-    label: '版本更新',
-    key: 'editProfile',
-    icon: renderIcon(EditIcon)
-  },
-  {
-    label: '退出登录',
-    key: 'logout',
-    icon: renderIcon(LogoutIcon),
-  }
-]
+
+
+const options = computed(() =>
+  [
+    { label: '用户资料', key: 'profile', icon: renderIcon(UserIcon), show: true },
+    { label: '版本更新', key: 'editProfile', icon: renderIcon(EditIcon), show: true },
+    { label: '管理后台', key: 'admin', icon: renderIcon(EditIcon), show: appSettingsStore.app.userInfo.authorityId == '1087' ? true: false },
+    { label: '退出登录', key: 'logout', icon: renderIcon(LogoutIcon), show: true },
+  ]
+    .filter(o => o.show)
+    .map(({ show, ...rest }) => rest)
+)
 const handleSelect = (key: string) => {
   console.log('点击了：', key)
 
   if (key === 'logout') {
     handleLogout()
+  }
+    if (key === 'admin') {
+    toHome()
   }
 }
 </script>
@@ -277,7 +278,7 @@ const handleSelect = (key: string) => {
 
                       <n-button secondary strong size="small" class="text-13px  text-white">{{ formatBytes(s.download +
                         s.upload, 2)
-                        }}</n-button>
+                      }}</n-button>
 
                     </template>
                     <span>↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
@@ -296,8 +297,8 @@ const handleSelect = (key: string) => {
                 <div class="max-w-240px ">
                   <div class="text-12px">请使用您的iphone中的Shadowrocket App扫描下面二维码</div>
                   <div class="text-center">
-                    <n-qr-code icon-src="@/assets/icon/icon.ico" icon-background-color="red"
-                      :value="userSubUrl" error-correction-level="H" />
+                    <n-qr-code icon-src="@/assets/icon/icon.ico" icon-background-color="red" :value="userSubUrl"
+                      error-correction-level="H" />
                   </div>
 
                 </div>
@@ -361,17 +362,21 @@ const handleSelect = (key: string) => {
                     <n-button>Prefix</n-button> 
                      <GameControllerOutline />
                 </template> -->
-                <n-thing  content-style="margin-top: 5px;">
-                  <template #header><div class="text-12px">{{ snode.tag }}</div></template>
+                <n-thing content-style="margin-top: 5px;">
+                  <template #header>
+                    <div class="text-12px">{{ snode.tag }}</div>
+                  </template>
                   <template #description>
                     <n-space size="medium" style="margin-top: 4px;">
-                      <n-tag class="text-10px" :bordered="false"  type="info" size="small">
+                      <n-tag class="text-10px" :bordered="false" type="info" size="small">
                         CN2 GIA
                       </n-tag>
-                      <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false" type="success" size="small">
+                      <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false"
+                        type="success" size="small">
                         可用
                       </n-tag>
-                      <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) === '--'" :bordered="false" type="error" size="small">
+                      <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) === '--'" :bordered="false"
+                        type="error" size="small">
                         不可用
                       </n-tag>
                       <n-tag class="text-10px" :bordered="false" type="success" size="small"

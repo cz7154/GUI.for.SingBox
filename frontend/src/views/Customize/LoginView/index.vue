@@ -125,6 +125,7 @@ const loginIn = async () => {
     if (result.code == 0) {
       appSettingsStore.app.userInfo.token = result.data.token
       appSettingsStore.app.userInfo.userName = result.data.user.userName
+      appSettingsStore.app.userInfo.authorityId = result.data.user.authorityId
       appSettingsStore.app.userInfo.userSubUrl = `https://hksui.czvps.top/sub/${result.data.user.userName}`
       // 记住账户密码
       if (loginForm.value.remember) {

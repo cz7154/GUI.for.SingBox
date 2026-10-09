@@ -127,6 +127,7 @@ export interface AppSettings {
     token: string
     password: string
     userSubUrl: string
+    authorityId: string
   }
 }
 
