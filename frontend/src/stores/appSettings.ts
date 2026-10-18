@@ -118,6 +118,7 @@ export const useAppSettingsStore = defineStore('app-settings', () => {
       token: '',
       password: '',
       userSubUrl:'',
+      authorityId: '',
   }
   })
 

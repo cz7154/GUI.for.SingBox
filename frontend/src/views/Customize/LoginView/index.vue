@@ -156,7 +156,7 @@ const init = async () => {
   //     return
   //   }
 
-    if (appSettingsStore.app.userInfo.password) {
+    if (appSettingsStore.app?.userInfo?.password) {
       loginForm.value.userName = appSettingsStore.app.userInfo.userName
       loginForm.value.password = appSettingsStore.app.userInfo.password
     }
