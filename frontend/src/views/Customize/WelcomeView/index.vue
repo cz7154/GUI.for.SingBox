@@ -328,7 +328,13 @@ const handleSelect = (key: string) => {
         <div class="mb-12px flex flex-col gap-10px md:flex-row md:items-center md:justify-between">
           <n-button :type="kernelApiStore.running ? 'error' : 'primary'" size="large" :loading="kernelApiStore.starting"
             class="h-50px rounded-14px px-28px text-18px font-semibold" @click="handleToggleKernel">
-            {{ kernelApiStore.running ? '停止 VPN 连接' : '开启 VPN 连接' }}
+         
+                        <div>
+              <div class="text-12px font-semibold mb-5px">   {{ kernelApiStore.running ? '停止 VPN 连接' : '开启 VPN 连接' }}</div>
+              <div v-show="kernelApiStore.running" class="ml-8px text-10px opacity-70">
+                当前节点： {{ firstProxyGroup?.now || '--' }}
+              </div>
+            </div>
           </n-button>
 
           <n-button secondary type="primary" :loading="updateLoading" class="h-40px rounded-12px px-16px"
