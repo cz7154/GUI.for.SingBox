@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, onUnmounted, ref } from 'vue'
+import { computed, h, onUnmounted, ref, onActivated } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NImage, NBadge } from 'naive-ui'
@@ -14,12 +14,13 @@ import vipYear from '@/assets/img/vip-year.svg'
 import vip1 from '@/assets/img/vip1.svg'
 import { getProxyDelay } from '@/api/kernel'
 import { DefaultTestTimeout, DefaultTestURL } from '@/constant/app'
-import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
-import { formatBytes, formatDate, message, APP_CZ_NAME, handleUseProxy } from '@/utils'
+import { useAppSettingsStore, useKernelApiStore, useSubscribesStore, useProfilesStore } from '@/stores'
+import { formatBytes, formatDate, message, APP_CZ_NAME, handleUseProxy, buildSmartRegExp, sleep } from '@/utils'
 import type { Subscription } from '@/types/app'
 const kernelApiStore = useKernelApiStore()
 const appSettingsStore = useAppSettingsStore()
 const subscribeStore = useSubscribesStore()
+const profilesStore = useProfilesStore()
 const { t } = useI18n()
 const router = useRouter()
 
@@ -87,12 +88,6 @@ const getCountryIcon = (tagName: string): string | undefined => {
   return icon
 }
 
-// const getCountryIcon = (code: string) =>{
-//     countryIcons[`/src/assets/img/country/${code}.svg`]
-
-// }
-  
-
 const userName = computed(() => appSettingsStore.app.userInfo.userName || '用户')
 
 const userSubUrl = computed(() => appSettingsStore.app.userInfo.userSubUrl || '')
@@ -145,21 +140,24 @@ const handleStartKernel = async () => {
 const handleStopKernel = async () => {
   try {
     await kernelApiStore.stopCore()
+    clearInterval(timer)
   } catch (error: any) {
     console.error(error)
     message.error(error.message || error)
   }
 }
-
-const handleToggleKernel = () => {
+const timer = setInterval(() => {
+  kernelApiStore.refreshProviderProxies()
+}, 5000)
+const handleToggleKernel = async () => {
   if (kernelApiStore.running) {
     handleStopKernel()
     return
   }
-
-  handleStartKernel()
+  await handleStartKernel()
+  timer
 }
-
+onUnmounted(() => clearInterval(timer))
 const handleUpdateSub = async (s: Subscription) => {
   updateLoading.value = true
   try {
@@ -262,7 +260,7 @@ const options = computed(() =>
   [
     { label: '用户资料', key: 'profile', icon: renderIcon(UserIcon), show: true },
     { label: '版本更新', key: 'editProfile', icon: renderIcon(EditIcon), show: true },
-    { label: '管理后台', key: 'admin', icon: renderIcon(EditIcon), show: appSettingsStore.app.userInfo.authorityId == '1087' ? true: false },
+    { label: '管理后台', key: 'admin', icon: renderIcon(EditIcon), show: appSettingsStore.app.userInfo.authorityId == '1087' ? true : false },
     { label: '退出登录', key: 'logout', icon: renderIcon(LogoutIcon), show: true },
   ]
     .filter(o => o.show)
@@ -274,10 +272,68 @@ const handleSelect = (key: string) => {
   if (key === 'logout') {
     handleLogout()
   }
-    if (key === 'admin') {
+  if (key === 'admin') {
     toHome()
   }
 }
+
+
+// 该函数从GroupsController.vue中复用提取出来，目的能实时显示节点信息
+const filterKeywordsMap = ref<Record<string, string>>({})
+const groups = computed(() => {
+  const { proxies } = kernelApiStore
+  const iconMapping = (profilesStore.currentProfile?.outbounds || []).reduce((p, c) => {
+    p[c.tag] = c.icon
+    return p
+  }, {} as Recordable<string>)
+  const hiddenList = (profilesStore.currentProfile?.outbounds || []).flatMap((v) =>
+    v.hidden ? v.tag : [],
+  )
+  return Object.values(proxies)
+    .filter(
+      (v) =>
+        ['Selector', 'URLTest'].includes(v.type) &&
+        v.name !== 'GLOBAL' &&
+        !hiddenList.includes(v.name),
+    )
+    .concat(proxies.GLOBAL || [])
+    .map((group) => {
+      const all = (group.all || [])
+        .filter((proxy) => {
+          const history = proxies[proxy]?.history || []
+          const alive = (history[history.length - 1]?.delay ?? 0) > 0
+          const condition1 =
+            appSettingsStore.app.kernel.unAvailable ||
+            ['direct', 'block'].includes(proxy) ||
+            proxies[proxy]?.all ||
+            alive
+          const keywords = filterKeywordsMap.value[group.name]
+          const condition2 = keywords ? buildSmartRegExp(keywords, 'i').test(proxy) : true
+          return condition1 && condition2
+        })
+        .map((proxy) => {
+          const history = proxies[proxy]?.history || []
+          const delay = history[history.length - 1]?.delay || 0
+          return { ...proxies[proxy]!, delay }
+        })
+        .sort((a, b) => {
+          if (!appSettingsStore.app.kernel.sortByDelay || a.delay === b.delay) return 0
+          if (!a.delay) return 1
+          if (!b.delay) return -1
+          return a.delay - b.delay
+        })
+
+      const chains = [group.now]
+      let tmp = proxies[group.now]
+      while (tmp) {
+        tmp.now && chains.push(tmp.now)
+        tmp = proxies[tmp.now]
+      }
+      return { ...group, all, chains, icon: iconMapping[group.name] }
+    })
+})
+
+
 </script>
 
 <template>
@@ -296,16 +352,7 @@ const handleSelect = (key: string) => {
                 </template>
                 设置
               </n-button>
-              <!-- <n-float-button position="relative">
-                      <template #description>
-        设置
-      </template>
-                <n-badge dot :offset="[4, -4]">
-                  <n-icon>
-                    <SettingsIcon />
-                  </n-icon>
-                </n-badge>
-              </n-float-button> -->
+
             </n-dropdown>
           </div>
         </div>
@@ -316,11 +363,7 @@ const handleSelect = (key: string) => {
             <div class="flex items-center gap-2">
               <div class="text-lg">👤</div>
               <div class=" text-16px font-medium">{{ userName }}</div>
-               <n-image
-              style="width: 30px; height: 20px; object-fit: contain"
-              :src="vipYear"
-              preview-disabled
-            />
+              <n-image style="width: 30px; height: 20px; object-fit: contain" :src="vipYear" preview-disabled />
             </div>
             <div class="  py-4px text-13px mb-6px">
               <div>{{ t('subscribes.expire') }}：{{ s.expire ? formatDate(s.expire, 'YYYY-MM-DD HH:mm:ss') : '--' }}
@@ -330,10 +373,6 @@ const handleSelect = (key: string) => {
                 <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
               <div>
-                <!-- <span>{{ t('subscribes.total') }}：{{ formatBytes(s.download + s.upload, 2) }}</span>
-                <span class="ml-3px text-10px">( ↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
-                  ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }} )</span>
-                <span class="mx-2">/ {{ s.total ? formatBytes(s.total, 2) : '--' }}</span> -->
                 <div>
                   <span>{{ t('subscribes.total') }}：</span>
                   <n-popover trigger="hover">
@@ -366,36 +405,22 @@ const handleSelect = (key: string) => {
 
                 </div>
               </n-popover>
-              <!-- <n-button   :loading="updateLoading" class=" rounded-12px px-8px"
-            @click="handleUpdateSub(s)">
-            <div>
-              <div class="text-12px text-white font-semibold mb-5px">更新订阅</div>
-              <div class="ml-8px text-10px text-white opacity-70">
-                {{ s.updateTime ? formatDate(s.updateTime, 'YYYY-MM-DD HH:mm:ss') : '--' }}
-              </div>
-            </div>
-          </n-button> -->
 
             </div>
-
           </div>
-
         </div>
-
-
-
-
       </div>
 
       <div class="px-10px py-10px">
         <div class="mb-12px flex flex-col gap-10px md:flex-row md:items-center md:justify-between">
           <n-button :type="kernelApiStore.running ? 'error' : 'primary'" size="large" :loading="kernelApiStore.starting"
             class="h-50px rounded-14px px-28px text-18px font-semibold" @click="handleToggleKernel">
-         
-                        <div>
-              <div class="text-12px font-semibold mb-5px">   {{ kernelApiStore.running ? '停止 VPN 连接' : '开启 VPN 连接' }}</div>
+
+            <div>
+              <div class="text-12px font-semibold mb-5px"> {{ kernelApiStore.running ? '停止 VPN 连接' : '开启 VPN 连接' }}
+              </div>
               <div v-show="kernelApiStore.running" class="ml-8px text-10px opacity-70">
-                当前节点： {{ firstProxyGroup?.now || '--' }}
+                当前节点： {{ groups[0]?.chains[0] }}-{{ groups[0]?.chains[1] }}
               </div>
             </div>
           </n-button>
@@ -434,22 +459,19 @@ const handleSelect = (key: string) => {
                 <n-thing content-style="margin-top: 5px;">
                   <template #header>
                     <div class="flex items-center gap-2">
-                      
-                                     <n-image
-           style="width: 20px; height: 20px; object-fit: contain"
-              :src="getCountryIcon(snode.tag)"
-              preview-disabled
-            /><div class="text-12px">{{ snode.tag }}</div>
+
+                      <n-image style="width: 20px; height: 20px; object-fit: contain" :src="getCountryIcon(snode.tag)"
+                        preview-disabled />
+                      <div class="text-12px">{{ snode.tag }}</div>
                     </div>
-                    
+
                   </template>
                   <template #description>
                     <n-space size="medium" style="margin-top: 4px;">
                       <n-tag class="text-10px" :bordered="false" type="info" size="small">
                         CN2 GIA
                       </n-tag>
-                      <n-tag class="text-10px"  :bordered="false"
-                        type="success" size="small">
+                      <n-tag class="text-10px" :bordered="false" type="success" size="small">
                         独享节点
                       </n-tag>
                       <!-- <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false"
