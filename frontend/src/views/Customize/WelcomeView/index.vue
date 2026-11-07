@@ -25,6 +25,7 @@ const { t } = useI18n()
 const router = useRouter()
 
 const showLogoutConfirm = ref(false)
+const showTechnicalSupportConfirm = ref(false)
 const updateLoading = ref(false)
 const selectedProxyIds = ref<Record<string, string>>({})
 const selectedProxyTag = ref('')
@@ -140,6 +141,9 @@ const handleStartKernel = async () => {
 const handleStopKernel = async () => {
   try {
     await kernelApiStore.stopCore()
+    // 重置实时流量
+    statistics.value.upload =0
+    statistics.value.download =0
     clearInterval(timer)
   } catch (error: any) {
     console.error(error)
@@ -258,7 +262,7 @@ function renderIcon(icon: Component) {
 
 const options = computed(() =>
   [
-    { label: '用户资料', key: 'profile', icon: renderIcon(UserIcon), show: true },
+    { label: '技术支持', key: 'technicalSupport', icon: renderIcon(UserIcon), show: true },
     { label: '版本更新', key: 'editProfile', icon: renderIcon(EditIcon), show: true },
     { label: '管理后台', key: 'admin', icon: renderIcon(EditIcon), show: appSettingsStore.app.userInfo.authorityId == '1087' ? true : false },
     { label: '退出登录', key: 'logout', icon: renderIcon(LogoutIcon), show: true },
@@ -274,6 +278,9 @@ const handleSelect = (key: string) => {
   }
   if (key === 'admin') {
     toHome()
+  }
+  if (key === 'technicalSupport') {
+      showTechnicalSupportConfirm.value = true
   }
 }
 
@@ -507,6 +514,10 @@ const groups = computed(() => {
     <n-modal v-model:show="showLogoutConfirm" preset="dialog" title="提示" positive-text="确认" negative-text="取消"
       @positive-click="handleConfirmLogout">
       退出登录后将停止 VPN 连接，是否继续？
+    </n-modal>
+        <n-modal v-model:show="showTechnicalSupportConfirm" preset="dialog" title="技术支持" positive-text="确认" 
+      >
+      请详细描述你的情况，并附上截图，发送到邮箱：****@gmail.com，技术支持人员会尽快联系你。
     </n-modal>
   </div>
 </template>
