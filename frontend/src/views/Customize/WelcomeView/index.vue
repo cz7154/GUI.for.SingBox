@@ -2,7 +2,7 @@
 import { computed, h, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NFloatButton, NBadge } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NImage, NBadge } from 'naive-ui'
 import type { Component } from 'vue'
 import {
   Pencil as EditIcon,
@@ -10,7 +10,8 @@ import {
   PersonCircleOutline as UserIcon,
   Settings as SettingsIcon,
 } from '@vicons/ionicons5'
-
+import vipYear from '@/assets/img/vip-year.svg'
+import vip1 from '@/assets/img/vip1.svg'
 import { getProxyDelay } from '@/api/kernel'
 import { DefaultTestTimeout, DefaultTestURL } from '@/constant/app'
 import { useAppSettingsStore, useKernelApiStore, useSubscribesStore } from '@/stores'
@@ -34,6 +35,63 @@ const statistics = ref({
   upload: 0,
   download: 0,
 })
+
+const countryIcons = import.meta.glob('@/assets/img/country/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
+
+const countryRules = [
+  { aliases: ['US', '美国'], file: 'US.svg' },
+  { aliases: ['TH', '泰国'], file: 'TH.svg' },
+  { aliases: ['JP', '日本'], file: 'JP.svg' },
+  { aliases: ['SG', '新加坡'], file: 'SG.svg' },
+  { aliases: ['MY', '马来西亚'], file: 'MY.svg' },
+  { aliases: ['DE', '德国'], file: 'DE.svg' },
+  { aliases: ['KR', '韩国'], file: 'KR.svg' },
+  { aliases: ['TW', '台湾'], file: 'TW.svg' },
+  { aliases: ['FR', '法国'], file: 'FR.svg' },
+  { aliases: ['GB', '英国'], file: 'GB.svg' },
+  { aliases: ['CA', '加拿大'], file: 'CA.svg' },
+  { aliases: ['AU', '澳大利亚'], file: 'AU.svg' },
+  { aliases: ['RU', '俄罗斯'], file: 'RU.svg' },
+  { aliases: ['NL', '荷兰'], file: 'NL.svg' },
+  { aliases: ['SE', '瑞典'], file: 'SE.svg' },
+  { aliases: ['CH', '瑞士'], file: 'CH.svg' },
+  { aliases: ['ES', '西班牙'], file: 'ES.svg' },
+  { aliases: ['IT', '意大利'], file: 'IT.svg' },
+  { aliases: ['BR', '巴西'], file: 'BR.svg' },
+  { aliases: ['IN', '印度'], file: 'IN.svg' },
+  { aliases: ['ID', '印度尼西亚'], file: 'ID.svg' },
+  { aliases: ['VN', '越南'], file: 'VN.svg' },
+  { aliases: ['HK', '香港'], file: 'HK.svg' },
+]
+
+const countryIconCache = new Map<string, string>()
+
+// 根据节点标签名称获取国家图标
+const getCountryIcon = (tagName: string): string | undefined => {
+  const cached = countryIconCache.get(tagName)
+  if (cached) return cached
+
+  const prefix = [...tagName].slice(0, 4).join('')
+  const country = countryRules.find(({ aliases }) =>
+    aliases.some((alias) => prefix.includes(alias)),
+  )
+  const getIconByFile = (file: string) =>
+    Object.entries(countryIcons).find(([path]) => path.endsWith(`/${file}`))?.[1]
+  const icon = (country && getIconByFile(country.file)) || getIconByFile('US.svg')
+
+  if (icon) countryIconCache.set(tagName, icon)
+  return icon
+}
+
+// const getCountryIcon = (code: string) =>{
+//     countryIcons[`/src/assets/img/country/${code}.svg`]
+
+// }
+  
 
 const userName = computed(() => appSettingsStore.app.userInfo.userName || '用户')
 
@@ -226,7 +284,7 @@ const handleSelect = (key: string) => {
   <div class="">
     <div v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false"
       class="mb-32px overflow-hidden rounded-20px " content-class="p-0!">
-      <div class="bg-#18a058 px-32px py-24px text-white ">
+      <div class="bg-#93dfb7 px-32px py-24px text-black ">
         <div class="flex items-center">
           <div class="flex-1 m-0 text-12px font-semibold">欢迎来到 {{ APP_CZ_NAME }}</div>
           <div class="">
@@ -255,9 +313,14 @@ const handleSelect = (key: string) => {
         <div class="mt-6 flex items-center gap-4  ">
 
           <div class="">
-            <div class="flex items-center">
+            <div class="flex items-center gap-2">
               <div class="text-lg">👤</div>
-              <div class="ml-10px pb-5px text-16px font-medium">{{ userName }}</div>
+              <div class=" text-16px font-medium">{{ userName }}</div>
+               <n-image
+              style="width: 30px; height: 20px; object-fit: contain"
+              :src="vipYear"
+              preview-disabled
+            />
             </div>
             <div class="  py-4px text-13px mb-6px">
               <div>{{ t('subscribes.expire') }}：{{ s.expire ? formatDate(s.expire, 'YYYY-MM-DD HH:mm:ss') : '--' }}
@@ -370,21 +433,33 @@ const handleSelect = (key: string) => {
                 </template> -->
                 <n-thing content-style="margin-top: 5px;">
                   <template #header>
-                    <div class="text-12px">{{ snode.tag }}</div>
+                    <div class="flex items-center gap-2">
+                      
+                                     <n-image
+           style="width: 20px; height: 20px; object-fit: contain"
+              :src="getCountryIcon(snode.tag)"
+              preview-disabled
+            /><div class="text-12px">{{ snode.tag }}</div>
+                    </div>
+                    
                   </template>
                   <template #description>
                     <n-space size="medium" style="margin-top: 4px;">
                       <n-tag class="text-10px" :bordered="false" type="info" size="small">
                         CN2 GIA
                       </n-tag>
-                      <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false"
+                      <n-tag class="text-10px"  :bordered="false"
+                        type="success" size="small">
+                        独享节点
+                      </n-tag>
+                      <!-- <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) != '--'" :bordered="false"
                         type="success" size="small">
                         可用
                       </n-tag>
                       <n-tag class="text-10px" v-if="getProxyDelayText(snode.tag) === '--'" :bordered="false"
                         type="error" size="small">
                         不可用
-                      </n-tag>
+                      </n-tag> -->
                       <n-tag class="text-10px" :bordered="false" type="success" size="small"
                         :class="kernelApiStore.running ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
                         @click.stop="handleProxyDelay(snode.tag)">
