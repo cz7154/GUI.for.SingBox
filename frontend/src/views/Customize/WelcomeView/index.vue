@@ -2,7 +2,7 @@
 import { computed, h, onUnmounted, ref, onActivated } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NImage, NBadge } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NImage, NBadge,NTooltip } from 'naive-ui'
 import type { Component } from 'vue'
 import {
   Pencil as EditIcon,
@@ -142,8 +142,8 @@ const handleStopKernel = async () => {
   try {
     await kernelApiStore.stopCore()
     // 重置实时流量
-    statistics.value.upload =0
-    statistics.value.download =0
+    statistics.value.upload = 0
+    statistics.value.download = 0
     clearInterval(timer)
   } catch (error: any) {
     console.error(error)
@@ -224,7 +224,7 @@ const handleProxyDelay = async (proxyTag: string) => {
   }
 }
 
-const handleAllProxyDelay =  (s: Subscription) => {
+const handleAllProxyDelay = (s: Subscription) => {
   if (!kernelApiStore.running) {
     message.info('请先启动 VPN 后测速')
     return
@@ -233,7 +233,7 @@ const handleAllProxyDelay =  (s: Subscription) => {
   proxyDelayAllLoading.value = true
   try {
     for (const proxy of s.proxies) {
-       handleProxyDelay(proxy.tag)
+      handleProxyDelay(proxy.tag)
     }
   } finally {
     proxyDelayAllLoading.value = false
@@ -280,7 +280,7 @@ const handleSelect = (key: string) => {
     toHome()
   }
   if (key === 'technicalSupport') {
-      showTechnicalSupportConfirm.value = true
+    showTechnicalSupportConfirm.value = true
   }
 }
 
@@ -370,12 +370,19 @@ const groups = computed(() => {
             <div class="flex items-center gap-2">
               <div class="text-lg">👤</div>
               <div class=" text-16px font-medium">{{ userName }}</div>
-              <n-image style="width: 30px; height: 20px; object-fit: contain" :src="vipYear" preview-disabled />
+              <n-tooltip trigger="hover">
+                <template #trigger>
+                  <n-image class=" transition-transform duration-300 ease-out hover:scale-110"
+                    style="width: 25px; height: 18px; object-fit: contain" :src="vipYear" preview-disabled />
+                </template>
+                <div class="text-10px">VIP年费会员</div>
+              </n-tooltip>
+
             </div>
             <div class="  py-4px text-13px mb-6px">
               <div>{{ t('subscribes.expire') }}：{{ s.expire ? formatDate(s.expire, 'YYYY-MM-DD HH:mm:ss') : '--' }}
               </div>
-              <div> <span>实时流量 ：</span>
+              <div> <span>实时流量: </span>
                 <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
                 <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
@@ -387,7 +394,7 @@ const groups = computed(() => {
 
                       <n-button secondary strong size="small" class="text-13px  text-white">{{ formatBytes(s.download +
                         s.upload, 2)
-                      }}</n-button>
+                        }}</n-button>
 
                     </template>
                     <span>↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
@@ -515,8 +522,7 @@ const groups = computed(() => {
       @positive-click="handleConfirmLogout">
       退出登录后将停止 VPN 连接，是否继续？
     </n-modal>
-        <n-modal v-model:show="showTechnicalSupportConfirm" preset="dialog" title="技术支持" positive-text="确认" 
-      >
+    <n-modal v-model:show="showTechnicalSupportConfirm" preset="dialog" title="技术支持" positive-text="确认">
       请详细描述你的情况，并附上截图，发送到邮箱：****@gmail.com，技术支持人员会尽快联系你。
     </n-modal>
   </div>
