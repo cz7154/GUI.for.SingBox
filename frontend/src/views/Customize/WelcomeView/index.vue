@@ -448,8 +448,8 @@ const groups = computed(() => {
         <n-card content-style="padding: 0px;max-height: 280px;" :bordered="false"
           header-style="padding: 8px;font-size: 13px;" segmented>
           <template #header>
-            节点列表({{ s.proxies.length }})
-            <n-button type="primary" size="small" round tertiary :loading="proxyDelayAllLoading"
+            <span class="text-12px font-semibold mr-5px">节点列表({{ s.proxies.length }})</span>
+            <n-button type="primary" size="tiny" class="text-10px " :loading="proxyDelayAllLoading"
               :disabled="!kernelApiStore.running" @click.stop="handleAllProxyDelay(s)">一键测速</n-button>
 
           </template>
