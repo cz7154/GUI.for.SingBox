@@ -219,7 +219,7 @@ init()
 
           <div class="mt-8px text-center text-14px text-gray-400"  >
             还没有账号？
-            <n-button text type="primary" size="small" class="ml-4px" @click="toHome" >
+            <n-button text type="primary" size="small" class="ml-4px" @click="handleRegistration" >
               立即注册
             </n-button>
           </div>

@@ -164,6 +164,8 @@ const handleToggleKernel = async () => {
 onUnmounted(() => clearInterval(timer))
 const handleUpdateSub = async (s: Subscription) => {
   updateLoading.value = true
+  // 更新订阅时清空测速结果，避免上次测速结果影响本次测速
+  proxyDelayMap.value = {}
   try {
     await subscribeStore.updateSubscribe(s.id)
     message.success('更新成功')
@@ -194,10 +196,13 @@ const isSelectedProxy = (_subscribeId: string, _proxyId: string, proxyTag: strin
   return currentProxyTag === proxyTag
 }
 
-const getProxyDelayText = (proxyTag: string) => {
+const getProxyDelayText = computed(() => (proxyTag: string) => {
   const delay = proxyDelayMap.value[proxyTag]
+  if(delay && delay >= 3000) {
+    return '超时'
+  }
   return delay ? `${delay}ms` : '--'
-}
+})
 
 const handleProxyDelay = async (proxyTag: string) => {
   if (!kernelApiStore.running) {
@@ -217,8 +222,9 @@ const handleProxyDelay = async (proxyTag: string) => {
     const proxy = kernelApiStore.proxies[proxyTag]
     proxy && proxy.history.push({ delay })
   } catch (error: any) {
-    proxyDelayMap.value[proxyTag] = 0
-    message.error(error + ': ' + proxyTag)
+    proxyDelayMap.value[proxyTag] = 3000
+   // proxyDelayMap.value[proxyTag] = ''
+    // message.error(error + ': ' + proxyTag)
   } finally {
     proxyDelayLoadingMap.value[proxyTag] = false
   }
@@ -364,18 +370,18 @@ const groups = computed(() => {
           </div>
         </div>
         <!-- 用户信息 -->
-        <div class="mt-6 flex items-center gap-4  ">
+        <div class="mt-3 flex items-center gap-4  ">
 
           <div class="">
             <div class="flex items-center gap-2">
               <div class="text-lg">👤</div>
-              <div class=" text-16px font-medium">{{ userName }}</div>
+              <div class=" text-4 font-medium">{{ userName }}</div>
               <n-tooltip trigger="hover">
                 <template #trigger>
                   <n-image class=" transition-transform duration-300 ease-out hover:scale-110"
                     style="width: 25px; height: 18px; object-fit: contain" :src="vipYear" preview-disabled />
                 </template>
-                <div class="text-10px">VIP年费会员</div>
+                <div class="text-2">VIP年费会员</div>
               </n-tooltip>
 
             </div>
@@ -496,7 +502,7 @@ const groups = computed(() => {
                         type="error" size="small">
                         不可用
                       </n-tag> -->
-                      <n-tag class="text-10px" :bordered="false" type="success" size="small"
+                      <n-tag class="text-10px" :bordered="false" :type="getProxyDelayText(snode.tag) === '超时' ? 'error' : 'success'" size="small"
                         :class="kernelApiStore.running ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
                         @click.stop="handleProxyDelay(snode.tag)">
                         延迟：{{ proxyDelayLoadingMap[snode.tag] ? '测试中...' : getProxyDelayText(snode.tag) }}
