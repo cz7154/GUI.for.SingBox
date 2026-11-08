@@ -127,15 +127,17 @@ const loginIn = async () => {
       appSettingsStore.app.userInfo.userName = result.data.user.userName
       appSettingsStore.app.userInfo.authorityId = result.data.user.authorityId
       appSettingsStore.app.userInfo.userSubUrl = `https://hksui.czvps.top/sub/${result.data.user.userName}`
-      // 记住账户密码
+
+      await handleSave(result.data.user.userName)
+      await toWelcome()
+            // 记住账户密码
       if (loginForm.value.remember) {
         appSettingsStore.app.userInfo.password = loginForm.value.password
       } else {
         appSettingsStore.app.userInfo.password = ''
+        loginForm.value.password = ''
       }
-
-      await handleSave(result.data.user.userName)
-      toWelcome()
+      loginForm.value.captcha = ''
     } else {
       message.error(result.msg)
       await loginVerify()

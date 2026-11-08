@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, h, onUnmounted, ref, onActivated } from 'vue'
+import { computed, h, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NImage, NBadge,NTooltip } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NImage, NBadge, NTooltip } from 'naive-ui'
 import type { Component } from 'vue'
 import {
   Pencil as EditIcon,
@@ -144,6 +144,7 @@ const handleStopKernel = async () => {
     // 重置实时流量
     statistics.value.upload = 0
     statistics.value.download = 0
+    stopTimer
     clearInterval(timer)
   } catch (error: any) {
     console.error(error)
@@ -198,7 +199,7 @@ const isSelectedProxy = (_subscribeId: string, _proxyId: string, proxyTag: strin
 
 const getProxyDelayText = computed(() => (proxyTag: string) => {
   const delay = proxyDelayMap.value[proxyTag]
-  if(delay && delay >= 3000) {
+  if (delay && delay >= 3000) {
     return '超时'
   }
   return delay ? `${delay}ms` : '--'
@@ -223,7 +224,7 @@ const handleProxyDelay = async (proxyTag: string) => {
     proxy && proxy.history.push({ delay })
   } catch (error: any) {
     proxyDelayMap.value[proxyTag] = 3000
-   // proxyDelayMap.value[proxyTag] = ''
+    // proxyDelayMap.value[proxyTag] = ''
     // message.error(error + ': ' + proxyTag)
   } finally {
     proxyDelayLoadingMap.value[proxyTag] = false
@@ -347,15 +348,53 @@ const groups = computed(() => {
 })
 
 
+// 连接计时
+const elapsedSeconds = ref(0)
+let connectTimer: ReturnType<typeof setInterval> | undefined
+
+const stopTimer = () => {
+  if (timer) {
+    clearInterval(timer)
+    connectTimer = undefined
+  }
+}
+
+watch(
+  () => kernelApiStore.running,
+  (running) => {
+    stopTimer()
+    elapsedSeconds.value = 0
+
+    if (running) {
+      connectTimer = setInterval(() => {
+        elapsedSeconds.value += 1
+      }, 1000)
+    }
+  },
+  { immediate: true },
+)
+
+onUnmounted(stopTimer)
+
+const formatElapsedTime = (totalSeconds: number) => {
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  return [hours, minutes, seconds]
+    .map((value) => String(value).padStart(2, '0'))
+    .join(':')
+}
+
 </script>
 
 <template>
   <div class="">
     <div v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false"
-      class="mb-32px overflow-hidden rounded-20px " content-class="p-0!">
-      <div class="bg-#93dfb7 px-32px py-24px text-black ">
+      class="mb-4 overflow-hidden rounded-4 " content-class="p-0!">
+      <div class="bg-#93dfb7 px-8 py-4 text-black ">
         <div class="flex items-center">
-          <div class="flex-1 m-0 text-12px font-semibold">欢迎来到 {{ APP_CZ_NAME }}</div>
+          <div class="flex-1 m-0 text-3.5 font-semibold">欢迎来到 {{ APP_CZ_NAME }}</div>
           <div class="">
             <n-dropdown trigger="click" :options="options" @select="handleSelect">
               <!-- @click="handleLogout" -->
@@ -375,32 +414,34 @@ const groups = computed(() => {
           <div class="">
             <div class="flex items-center gap-2">
               <div class="text-lg">👤</div>
-              <div class=" text-4 font-medium">{{ userName }}</div>
-              <n-tooltip trigger="hover">
-                <template #trigger>
-                  <n-image class=" transition-transform duration-300 ease-out hover:scale-110"
-                    style="width: 25px; height: 18px; object-fit: contain" :src="vipYear" preview-disabled />
-                </template>
-                <div class="text-2">VIP年费会员</div>
-              </n-tooltip>
+              <div>
+                <div class=" text-4 font-medium select-text">{{ userName }}</div>
+                <n-tooltip trigger="hover" placement="bottom-start"  >
+                  <template #trigger>
+                    <n-image class="h-3.5 transition-transform duration-300 ease-out hover:scale-110"
+                      style=" object-fit: contain" :src="vipYear" preview-disabled />
+                  </template>
+                  <div class="text-2">VIP年费会员</div>
+                </n-tooltip>
+              </div>
 
             </div>
-            <div class="  py-4px text-13px mb-6px">
-              <div>{{ t('subscribes.expire') }}：{{ s.expire ? formatDate(s.expire, 'YYYY-MM-DD HH:mm:ss') : '--' }}
+            <div class="py-2 text-3">
+              <div><span class="font-semibold"> {{ t('subscribes.expire') }}：</span>{{ s.expire ? formatDate(s.expire, 'YYYY-MM-DD HH:mm:ss') : '--' }}
               </div>
-              <div> <span>实时流量: </span>
+              <div> <span class="font-semibold">实时流量: </span>
                 <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
                 <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
               <div>
                 <div>
-                  <span>{{ t('subscribes.total') }}：</span>
+                  <span class="font-semibold">{{ t('subscribes.total') }}：</span>
                   <n-popover trigger="hover">
                     <template #trigger>
 
-                      <n-button secondary strong size="small" class="text-13px  text-white">{{ formatBytes(s.download +
+                      <n-button secondary strong size="small" class="text-3  ">{{ formatBytes(s.download +
                         s.upload, 2)
-                        }}</n-button>
+                      }}</n-button>
 
                     </template>
                     <span>↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
@@ -434,13 +475,14 @@ const groups = computed(() => {
       <div class="px-10px py-10px">
         <div class="mb-12px flex flex-col gap-10px md:flex-row md:items-center md:justify-between">
           <n-button :type="kernelApiStore.running ? 'error' : 'primary'" size="large" :loading="kernelApiStore.starting"
-            class="h-50px rounded-14px px-28px text-18px font-semibold" @click="handleToggleKernel">
+            class=" rounded-14px px-4 py-7  text-12 font-semibold" @click="handleToggleKernel">
 
             <div>
-              <div class="text-12px font-semibold mb-5px"> {{ kernelApiStore.running ? '停止 VPN 连接' : '开启 VPN 连接' }}
+              <div class="text-12px font-semibold mb-5px"> {{ kernelApiStore.running ? '停止连接' : '开启连接' }}
               </div>
               <div v-show="kernelApiStore.running" class="ml-8px text-10px opacity-70">
-                当前节点： {{ groups[0]?.chains[0] }}-{{ groups[0]?.chains[1] }}
+                <div class=" mb-2">当前节点： {{ groups[0]?.chains[0] }}-{{ groups[0]?.chains[1] }}</div>
+                <div>连接时长： {{ formatElapsedTime(elapsedSeconds) }}</div>
               </div>
             </div>
           </n-button>
@@ -502,7 +544,8 @@ const groups = computed(() => {
                         type="error" size="small">
                         不可用
                       </n-tag> -->
-                      <n-tag class="text-10px" :bordered="false" :type="getProxyDelayText(snode.tag) === '超时' ? 'error' : 'success'" size="small"
+                      <n-tag class="text-10px" :bordered="false"
+                        :type="getProxyDelayText(snode.tag) === '超时' ? 'error' : 'success'" size="small"
                         :class="kernelApiStore.running ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
                         @click.stop="handleProxyDelay(snode.tag)">
                         延迟：{{ proxyDelayLoadingMap[snode.tag] ? '测试中...' : getProxyDelayText(snode.tag) }}
@@ -528,7 +571,7 @@ const groups = computed(() => {
       @positive-click="handleConfirmLogout">
       退出登录后将停止 VPN 连接，是否继续？
     </n-modal>
-    <n-modal v-model:show="showTechnicalSupportConfirm" preset="dialog" title="技术支持" positive-text="确认">
+    <n-modal class="select-text" v-model:show="showTechnicalSupportConfirm" preset="dialog" title="技术支持" positive-text="确认">
       请详细描述你的情况，并附上截图，发送到邮箱：****@gmail.com，技术支持人员会尽快联系你。
     </n-modal>
   </div>
