@@ -144,25 +144,30 @@ const handleStopKernel = async () => {
     // 重置实时流量
     statistics.value.upload = 0
     statistics.value.download = 0
-    stopTimer
-    clearInterval(timer)
   } catch (error: any) {
     console.error(error)
     message.error(error.message || error)
   }
 }
-const timer = setInterval(() => {
-  kernelApiStore.refreshProviderProxies()
-}, 5000)
+const timer = async () => {
+  for (let i = 0; i < 10; i++) {
+    if (kernelApiStore.running) {
+      await sleep(3000)
+      console.log('刷新代理，获取最新节点', i);
+      kernelApiStore.refreshProviderProxies()
+    }
+  }
+  // kernelApiStore.refreshProviderProxies()
+}
 const handleToggleKernel = async () => {
   if (kernelApiStore.running) {
     handleStopKernel()
     return
   }
   await handleStartKernel()
-  timer
+  timer()
 }
-onUnmounted(() => clearInterval(timer))
+
 const handleUpdateSub = async (s: Subscription) => {
   updateLoading.value = true
   // 更新订阅时清空测速结果，避免上次测速结果影响本次测速
@@ -352,17 +357,9 @@ const groups = computed(() => {
 const elapsedSeconds = ref(0)
 let connectTimer: ReturnType<typeof setInterval> | undefined
 
-const stopTimer = () => {
-  if (timer) {
-    clearInterval(timer)
-    connectTimer = undefined
-  }
-}
-
 watch(
   () => kernelApiStore.running,
   (running) => {
-    stopTimer()
     elapsedSeconds.value = 0
 
     if (running) {
@@ -374,7 +371,6 @@ watch(
   { immediate: true },
 )
 
-onUnmounted(stopTimer)
 
 const formatElapsedTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600)
@@ -390,8 +386,8 @@ const formatElapsedTime = (totalSeconds: number) => {
 
 <template>
   <div class="">
-    <div v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false"
-      class="mb-4 overflow-hidden rounded-4 " content-class="p-0!">
+    <div v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false" class="mb-4 overflow-hidden rounded-4 "
+      content-class="p-0!">
       <div class="bg-#93dfb7 px-8 py-4 text-black ">
         <div class="flex items-center">
           <div class="flex-1 m-0 text-3.5 font-semibold">欢迎来到 {{ APP_CZ_NAME }}</div>
@@ -416,7 +412,7 @@ const formatElapsedTime = (totalSeconds: number) => {
               <div class="text-lg">👤</div>
               <div>
                 <div class=" text-4 font-medium select-text">{{ userName }}</div>
-                <n-tooltip trigger="hover" placement="bottom-start"  >
+                <n-tooltip trigger="hover" placement="bottom-start">
                   <template #trigger>
                     <n-image class="h-3.5 transition-transform duration-300 ease-out hover:scale-110"
                       style=" object-fit: contain" :src="vipYear" preview-disabled />
@@ -427,7 +423,8 @@ const formatElapsedTime = (totalSeconds: number) => {
 
             </div>
             <div class="py-2 text-3">
-              <div><span class="font-semibold"> {{ t('subscribes.expire') }}：</span>{{ s.expire ? formatDate(s.expire, 'YYYY-MM-DD HH:mm:ss') : '--' }}
+              <div><span class="font-semibold"> {{ t('subscribes.expire') }}：</span>{{ s.expire ? formatDate(s.expire,
+                'YYYY-MM-DD HH:mm:ss') : '--' }}
               </div>
               <div> <span class="font-semibold">实时流量: </span>
                 <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
@@ -441,7 +438,7 @@ const formatElapsedTime = (totalSeconds: number) => {
 
                       <n-button secondary strong size="small" class="text-3  ">{{ formatBytes(s.download +
                         s.upload, 2)
-                      }}</n-button>
+                        }}</n-button>
 
                     </template>
                     <span>↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
@@ -571,7 +568,8 @@ const formatElapsedTime = (totalSeconds: number) => {
       @positive-click="handleConfirmLogout">
       退出登录后将停止 VPN 连接，是否继续？
     </n-modal>
-    <n-modal class="select-text" v-model:show="showTechnicalSupportConfirm" preset="dialog" title="技术支持" positive-text="确认">
+    <n-modal class="select-text" v-model:show="showTechnicalSupportConfirm" preset="dialog" title="技术支持"
+      positive-text="确认">
       请详细描述你的情况，并附上截图，发送到邮箱：****@gmail.com，技术支持人员会尽快联系你。
     </n-modal>
   </div>
