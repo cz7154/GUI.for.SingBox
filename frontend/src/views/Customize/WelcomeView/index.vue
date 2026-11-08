@@ -224,7 +224,7 @@ const handleProxyDelay = async (proxyTag: string) => {
   }
 }
 
-const handleAllProxyDelay = async (s: Subscription) => {
+const handleAllProxyDelay =  (s: Subscription) => {
   if (!kernelApiStore.running) {
     message.info('请先启动 VPN 后测速')
     return
@@ -233,7 +233,7 @@ const handleAllProxyDelay = async (s: Subscription) => {
   proxyDelayAllLoading.value = true
   try {
     for (const proxy of s.proxies) {
-      await handleProxyDelay(proxy.tag)
+       handleProxyDelay(proxy.tag)
     }
   } finally {
     proxyDelayAllLoading.value = false
