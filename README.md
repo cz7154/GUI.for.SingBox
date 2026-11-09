@@ -1,10 +1,10 @@
 ## Preview
 
-Take a look at the live version here: 👉 <a href="https://gui-for-cores.github.io/guide/gfs/" target="_blank">Live Demo</a>
+    本项目仅供学习交流使用，无法直接依靠本项目实现代理效果！
 
 <div align="center">
   <img src="docs/imgs/login.png">
-  <img src="docs/imgs/welcom.png">
+  <img src="docs/imgs/welcom261109.png">
 </div>
 
 ## Document

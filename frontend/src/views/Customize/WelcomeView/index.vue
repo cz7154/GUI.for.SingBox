@@ -427,7 +427,7 @@ const formatElapsedTime = (totalSeconds: number) => {
                 'YYYY-MM-DD HH:mm:ss') : '--' }}
               </div>
               <div> <span class="font-semibold">实时流量: </span>
-                <span>↑ {{ formatBytes(statistics.upload) }}/s</span>
+                <span class="text-#36ad6">↑ {{ formatBytes(statistics.upload) }}/s</span>
                 <span class="mx-2">↓ {{ formatBytes(statistics.download) }}/s</span>
               </div>
               <div>
@@ -441,8 +441,8 @@ const formatElapsedTime = (totalSeconds: number) => {
                         }}</n-button>
 
                     </template>
-                    <span>↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}
-                      ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }}</span>
+                    <span >↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}</span>
+                     <span> ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }}</span>
                   </n-popover>
                   <span class="mx-2">/ {{ s.total ? formatBytes(s.total, 2) : '--' }}</span>
                 </div>

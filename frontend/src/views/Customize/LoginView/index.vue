@@ -139,7 +139,8 @@ const loginIn = async () => {
       }
       loginForm.value.captcha = ''
     } else {
-      message.error(result.msg)
+      console.error('登录失败:',result.msg)
+      message.error('登录失败，请联系管理员')
       await loginVerify()
     }
   } catch (error: any) {
