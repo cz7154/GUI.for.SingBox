@@ -386,7 +386,7 @@ const formatElapsedTime = (totalSeconds: number) => {
 
 <template>
   <div class="">
-    <div v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false" class="mb-4 overflow-hidden rounded-4 "
+    <div v-for="s in subscribeStore.subscribes" :key="s.id" :bordered="false" class="mb-4 overflow-hidden rounded-2 "
       content-class="p-0!">
       <div class="bg-#93dfb7 px-8 py-4 text-black ">
         <div class="flex items-center">
