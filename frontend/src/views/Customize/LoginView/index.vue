@@ -140,7 +140,7 @@ const loginIn = async () => {
       loginForm.value.captcha = ''
     } else {
       console.error('登录失败:',result.msg)
-      message.error('登录失败，请联系管理员')
+      message.error('登录失败，请检查用户名、密码和验证码是否正确')
       await loginVerify()
     }
   } catch (error: any) {
