@@ -93,6 +93,20 @@ const userName = computed(() => appSettingsStore.app.userInfo.userName || '用�
 
 const userSubUrl = computed(() => appSettingsStore.app.userInfo.userSubUrl || '')
 
+// 用户android订阅地址
+//const userAndroidSubUrl = computed(() => `sing-box://import-remote-profile?url=${appSettingsStore.app.userInfo.userSubUrl}?format=json#${appSettingsStore.app.userInfo.userSubUrl}` || '')
+const userAndroidSubUrl = computed(() => {
+  const subUrl = appSettingsStore.app.userInfo.userSubUrl
+  if (!subUrl) return ''
+
+  // 订阅地址作为 url 参数值，必须整体编码
+  const encodedUrl = encodeURIComponent(`${subUrl}?format=json`)
+  // 名称用备注名（如 test001），而不是完整 URL
+  const name = encodeURIComponent(appSettingsStore.app.userInfo.userName || 'profile')
+
+  return `sing-box://import-remote-profile?url=${encodedUrl}#${name}`
+})
+
 const firstProxyGroup = computed(() => {
   const { proxies } = kernelApiStore
   const groups = Object.values(proxies).filter(
@@ -455,9 +469,20 @@ const formatElapsedTime = (totalSeconds: number) => {
                   <n-button size="tiny" type="warning">手机上使用？</n-button>
                 </template>
                 <div class="max-w-240px ">
-                  <div class="text-12px">请使用您的iphone中的Shadowrocket App扫描下面二维码</div>
+                  <div class="text-12px">
+                    <span class="font-semibold">mac/ios：</span>
+                    <span class="text-#36ad6 break-all">请使用您的iphone中的Shadowrocket App扫描下面二维码</span>
+                  </div>
                   <div class="text-center">
                     <n-qr-code icon-src="@/assets/icon/icon.ico" icon-background-color="red" :value="userSubUrl"
+                      error-correction-level="H" />
+                  </div>
+                                    <div class="text-12px">
+                    <span class="font-semibold">android：</span>
+                    <span class="text-#36ad6 break-all">请使用您的android设备中的App扫描下面二维码</span>
+                  </div>
+                  <div class="text-center">
+                    <n-qr-code icon-src="@/assets/icon/icon.ico" icon-background-color="red" :value="userAndroidSubUrl"
                       error-correction-level="H" />
                   </div>
 
