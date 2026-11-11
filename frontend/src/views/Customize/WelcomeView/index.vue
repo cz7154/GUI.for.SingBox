@@ -464,7 +464,7 @@ const formatElapsedTime = (totalSeconds: number) => {
             </div>
             <!-- 手机二维码 -->
             <div>
-              <n-popover trigger="click">
+              <n-popover trigger="click" placement="bottom" :scrollable="true"  >
                 <template #trigger>
                   <n-button size="tiny" type="warning">手机上使用？</n-button>
                 </template>
