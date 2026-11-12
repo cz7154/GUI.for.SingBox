@@ -2,7 +2,7 @@
 import { computed, h, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NImage, NBadge, NTooltip } from 'naive-ui'
+import { NButton, NCard, NList, NListItem, NThing, NModal, NTag, NSpace, NScrollbar, NPopover, NQrCode, NDropdown, NIcon, NImage, NCollapse, NTooltip } from 'naive-ui'
 import type { Component } from 'vue'
 import {
   Pencil as EditIcon,
@@ -121,7 +121,11 @@ const unregisterTrafficHandler = kernelApiStore.onTraffic((data) => {
   statistics.value.download = down
 })
 
+
 onUnmounted(() => {
+  if (connectTimer) {
+    clearInterval(connectTimer)
+  }
   unregisterTrafficHandler()
 })
 
@@ -370,15 +374,24 @@ const groups = computed(() => {
 // 连接计时
 const elapsedSeconds = ref(0)
 let connectTimer: ReturnType<typeof setInterval> | undefined
-
+let startTime = 0
 watch(
   () => kernelApiStore.running,
   (running) => {
+    if (connectTimer) {
+      clearInterval(connectTimer)
+      connectTimer = undefined
+    }
+
     elapsedSeconds.value = 0
 
     if (running) {
+      startTime = Date.now()
+
       connectTimer = setInterval(() => {
-        elapsedSeconds.value += 1
+        elapsedSeconds.value = Math.floor(
+          (Date.now() - startTime) / 1000,
+        )
       }, 1000)
     }
   },
@@ -395,6 +408,13 @@ const formatElapsedTime = (totalSeconds: number) => {
     .map((value) => String(value).padStart(2, '0'))
     .join(':')
 }
+
+const expanded = ref(false)
+
+const qrCodeToggle = () => {
+  expanded.value = !expanded.value
+}
+
 
 </script>
 
@@ -452,11 +472,11 @@ const formatElapsedTime = (totalSeconds: number) => {
 
                       <n-button secondary strong size="small" class="text-3  ">{{ formatBytes(s.download +
                         s.upload, 2)
-                        }}</n-button>
+                      }}</n-button>
 
                     </template>
-                    <span >↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}</span>
-                     <span> ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }}</span>
+                    <span>↑ {{ s.upload ? formatBytes(s.upload, 2) : '--' }}</span>
+                    <span> ↓ {{ s.download ? formatBytes(s.download, 2) : '--' }}</span>
                   </n-popover>
                   <span class="mx-2">/ {{ s.total ? formatBytes(s.total, 2) : '--' }}</span>
                 </div>
@@ -464,24 +484,32 @@ const formatElapsedTime = (totalSeconds: number) => {
             </div>
             <!-- 手机二维码 -->
             <div>
-              <n-popover trigger="click" placement="bottom" :scrollable="true"  >
+              <n-popover trigger="click" placement="bottom" :scrollable="true">
                 <template #trigger>
                   <n-button size="tiny" type="warning">手机上使用？</n-button>
                 </template>
+
                 <div class="max-w-240px ">
-                  <div class="text-12px">
+
+                  <div class="text-3">
                     <span class="font-semibold">mac/ios：</span>
                     <span class="text-#36ad6 break-all">请使用您的iphone中的Shadowrocket App扫描下面二维码</span>
+                                        <n-button class="ml-2 text-3" text tag="a" type="primary" @click="qrCodeToggle">
+                      {{ !expanded ? '收起' : '展开' }}
+                    </n-button>
                   </div>
                   <div class="text-center">
-                    <n-qr-code icon-src="@/assets/icon/icon.ico" icon-background-color="red" :value="userSubUrl"
+                    <n-qr-code v-show="!expanded" icon-src="@/assets/icon/icon.ico" icon-background-color="red" :value="userSubUrl"
                       error-correction-level="H" />
                   </div>
-                                    <div class="text-12px">
+                  <div class="text-3">
                     <span class="font-semibold">android：</span>
                     <span class="text-#36ad6 break-all">请使用您的android设备中的App扫描下面二维码</span>
+                    <n-button class="ml-2 text-3" text tag="a" type="primary" @click="qrCodeToggle">
+                      {{ expanded ? '收起' : '展开' }}
+                    </n-button>
                   </div>
-                  <div class="text-center">
+                  <div class="text-center" v-show="expanded">
                     <n-qr-code icon-src="@/assets/icon/icon.ico" icon-background-color="red" :value="userAndroidSubUrl"
                       error-correction-level="H" />
                   </div>
@@ -503,7 +531,7 @@ const formatElapsedTime = (totalSeconds: number) => {
               <div class="text-12px font-semibold mb-5px"> {{ kernelApiStore.running ? '停止连接' : '开启连接' }}
               </div>
               <div v-show="kernelApiStore.running" class="ml-8px text-10px opacity-70">
-                <div class=" mb-2">当前节点： {{ groups[0]?.chains[0] }}-{{ groups[0]?.chains[1] }}</div>
+                <div class=" mb-2">当前节点：{{ groups[0]?.chains[0] }}{{ groups[0]?.chains[1] ? `-${groups[0].chains[1]}` : '' }}</div>
                 <div>连接时长： {{ formatElapsedTime(elapsedSeconds) }}</div>
               </div>
             </div>
